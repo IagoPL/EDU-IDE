@@ -185,9 +185,6 @@ export function MonacoEditor({ value, language, onChange, theme = "vs-dark" }: M
       autoIndent: "full",
       links: true,
       colorDecorators: true,
-      lightbulb: {
-        enabled: true,
-      },
     })
 
     // Listen for content changes
