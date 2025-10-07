@@ -2,6 +2,7 @@
 
 import { Button } from "./ui/button"
 import { PanelLeftClose, PanelRightClose, Play, Square, RotateCcw, Settings, User } from "lucide-react"
+import { ThemeSwitcher } from "./theme-switcher"
 
 interface ToolbarProps {
   sidebarOpen: boolean
@@ -44,6 +45,7 @@ export function Toolbar({ sidebarOpen, rightPanelOpen, onToggleSidebar, onToggle
 
       {/* Right Section */}
       <div className="flex items-center gap-2">
+        <ThemeSwitcher />
         <Button variant="ghost" size="sm">
           <Settings className="h-4 w-4" />
         </Button>
