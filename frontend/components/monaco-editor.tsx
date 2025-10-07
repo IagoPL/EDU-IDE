@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import type * as Monaco from "monaco-editor"
+import { useRef } from "react"
+import Editor, { OnMount, BeforeMount } from "@monaco-editor/react"
+import type { editor } from "monaco-editor"
 
 interface MonacoEditorProps {
   value: string
@@ -11,234 +12,146 @@ interface MonacoEditorProps {
 }
 
 export function MonacoEditor({ value, language, onChange, theme = "vs-dark" }: MonacoEditorProps) {
-  const editorRef = useRef<HTMLDivElement>(null)
-  const monacoEditorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null)
-  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const [monaco, setMonaco] = useState<typeof Monaco | null>(null)
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
-  // Cargar Monaco solo en el cliente
-  useEffect(() => {
-    const loadMonaco = async () => {
-      if (typeof window !== "undefined") {
-        // Configurar Monaco Environment ANTES de importar con workers optimizados
-        (window as any).MonacoEnvironment = {
-          getWorker(_: string, label: string) {
-            // Usar web workers para mejor rendimiento
-            const getWorkerModule = (moduleUrl: string, label: string) => {
-              return new Worker(
-                new URL(`monaco-editor/esm/vs/language/${label}/${label}.worker?worker`, import.meta.url),
-                { type: 'module' }
-              )
-            }
+  const handleEditorWillMount: BeforeMount = (monaco) => {
+    // Configurar opciones globales de Monaco antes de que se monte
+    
+    // JavaScript/TypeScript - opciones de diagnóstico
+    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: false,
+      noSyntaxValidation: false,
+    })
+    
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ES2020,
+      allowNonTsExtensions: true,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      module: monaco.languages.typescript.ModuleKind.CommonJS,
+      noEmit: true,
+      esModuleInterop: true,
+      jsx: monaco.languages.typescript.JsxEmit.React,
+      reactNamespace: 'React',
+      allowJs: true,
+      typeRoots: ['node_modules/@types'],
+    })
 
-            switch (label) {
-              case 'json':
-                return getWorkerModule('/json/', label)
-              case 'css':
-              case 'scss':
-              case 'less':
-                return getWorkerModule('/css/', label)
-              case 'html':
-              case 'handlebars':
-              case 'razor':
-                return getWorkerModule('/html/', label)
-              case 'typescript':
-              case 'javascript':
-                return getWorkerModule('/typescript/', 'ts')
-              default:
-                // Editor worker por defecto
-                return new Worker(
-                  new URL('monaco-editor/esm/vs/editor/editor.worker?worker', import.meta.url),
-                  { type: 'module' }
-                )
-            }
-          },
-        }
+    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: false,
+      noSyntaxValidation: false,
+    })
 
-        const monacoModule = await import("monaco-editor")
-        
-        // Configurar opciones globales de Monaco
-        monacoModule.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-          noSemanticValidation: false,
-          noSyntaxValidation: false,
-        })
-        
-        monacoModule.languages.typescript.javascriptDefaults.setCompilerOptions({
-          target: monacoModule.languages.typescript.ScriptTarget.ES2020,
-          allowNonTsExtensions: true,
-          moduleResolution: monacoModule.languages.typescript.ModuleResolutionKind.NodeJs,
-          module: monacoModule.languages.typescript.ModuleKind.CommonJS,
-          noEmit: true,
-          esModuleInterop: true,
-          jsx: monacoModule.languages.typescript.JsxEmit.React,
-          reactNamespace: 'React',
-          allowJs: true,
-          typeRoots: ['node_modules/@types'],
-        })
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ES2020,
+      allowNonTsExtensions: true,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      module: monaco.languages.typescript.ModuleKind.CommonJS,
+      noEmit: true,
+      esModuleInterop: true,
+      jsx: monaco.languages.typescript.JsxEmit.React,
+      reactNamespace: 'React',
+      allowJs: true,
+      typeRoots: ['node_modules/@types'],
+    })
+  }
 
-        monacoModule.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-          noSemanticValidation: false,
-          noSyntaxValidation: false,
-        })
-        
-        monacoModule.languages.typescript.typescriptDefaults.setCompilerOptions({
-          target: monacoModule.languages.typescript.ScriptTarget.ES2020,
-          allowNonTsExtensions: true,
-          moduleResolution: monacoModule.languages.typescript.ModuleResolutionKind.NodeJs,
-          module: monacoModule.languages.typescript.ModuleKind.CommonJS,
-          noEmit: true,
-          esModuleInterop: true,
-          jsx: monacoModule.languages.typescript.JsxEmit.React,
-          reactNamespace: 'React',
-          typeRoots: ['node_modules/@types'],
-        })
-        
-        setMonaco(monacoModule)
-      }
-    }
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
+    editorRef.current = editor
 
-    loadMonaco()
-  }, [])
-
-  useEffect(() => {
-    if (!editorRef.current || !monaco) return
-
-    // Initialize Monaco Editor con configuración avanzada
-    monacoEditorRef.current = monaco.editor.create(editorRef.current, {
-      value,
-      language,
-      theme,
-      automaticLayout: false, // Disable to prevent ResizeObserver errors
+    // Configurar opciones del editor
+    editor.updateOptions({
       fontSize: 14,
-      fontFamily: "var(--font-mono), 'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
-      fontLigatures: true, // Habilitar ligaduras de fuente
+      fontFamily: '"Fira Code", "Cascadia Code", "Consolas", "Monaco", "Courier New", monospace',
+      fontLigatures: true,
+      lineNumbers: "on",
+      roundedSelection: false,
+      scrollBeyondLastLine: false,
+      readOnly: false,
       minimap: {
         enabled: true,
         scale: 1,
-        showSlider: "mouseover",
       },
-      scrollBeyondLastLine: false,
-      lineNumbers: "on",
-      renderWhitespace: "selection",
+      folding: true,
+      foldingStrategy: "indentation",
+      showFoldingControls: "always",
+      automaticLayout: true,
+      wordWrap: "on",
+      wrappingIndent: "indent",
+      scrollbar: {
+        vertical: "visible",
+        horizontal: "visible",
+        useShadows: false,
+        verticalScrollbarSize: 10,
+        horizontalScrollbarSize: 10,
+      },
       tabSize: 2,
       insertSpaces: true,
-      wordWrap: "on",
-      cursorBlinking: "smooth",
-      cursorSmoothCaretAnimation: "on",
-      smoothScrolling: true,
+      detectIndentation: true,
+      trimAutoWhitespace: true,
+      formatOnPaste: true,
+      formatOnType: true,
+      autoClosingBrackets: "languageDefined",
+      autoClosingQuotes: "languageDefined",
+      autoSurround: "languageDefined",
+      suggestOnTriggerCharacters: true,
+      acceptSuggestionOnEnter: "on",
+      snippetSuggestions: "inline",
+      wordBasedSuggestions: "currentDocument",
+      bracketPairColorization: {
+        enabled: true,
+      },
+      guides: {
+        bracketPairs: true,
+        indentation: true,
+      },
       padding: {
         top: 16,
         bottom: 16,
       },
-      // Características avanzadas
-      suggestOnTriggerCharacters: true,
-      quickSuggestions: {
-        other: true,
-        comments: false,
-        strings: true,
-      },
-      acceptSuggestionOnCommitCharacter: true,
-      acceptSuggestionOnEnter: "on",
-      snippetSuggestions: "inline",
-      wordBasedSuggestions: "matchingDocuments",
-      parameterHints: {
-        enabled: true,
-        cycle: true,
-      },
-      // Bracket matching
-      matchBrackets: "always",
-      bracketPairColorization: {
-        enabled: true,
-        independentColorPoolPerBracketType: true,
-      },
-      // Code folding
-      folding: true,
-      foldingStrategy: "indentation",
-      foldingHighlight: true,
-      unfoldOnClickAfterEndOfLine: true,
-      showFoldingControls: "mouseover",
-      // Find & Replace
+      smoothScrolling: true,
+      cursorBlinking: "smooth",
+      cursorSmoothCaretAnimation: "on",
       find: {
-        addExtraSpaceOnTop: true,
+        addExtraSpaceOnTop: false,
         autoFindInSelection: "never",
-        seedSearchStringFromSelection: "always",
+        seedSearchStringFromSelection: "selection",
       },
-      // Gutter
-      glyphMargin: true,
-      lineDecorationsWidth: 10,
-      lineNumbersMinChars: 3,
-      // Scrollbar
-      scrollbar: {
-        vertical: "auto",
-        horizontal: "auto",
-        useShadows: true,
-        verticalScrollbarSize: 12,
-        horizontalScrollbarSize: 12,
-      },
-      // Otros
-      contextmenu: true,
-      mouseWheelZoom: true,
-      formatOnPaste: true,
-      formatOnType: true,
-      autoClosingBrackets: "always",
-      autoClosingQuotes: "always",
-      autoIndent: "full",
-      links: true,
-      colorDecorators: true,
     })
 
-    // Listen for content changes
-    const disposable = monacoEditorRef.current.onDidChangeModelContent(() => {
-      const currentValue = monacoEditorRef.current?.getValue() || ""
-      onChange?.(currentValue)
-    })
+    // Focus en el editor
+    editor.focus()
+  }
 
-    const resizeObserver = new ResizeObserver(() => {
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current)
+  const handleChange = (newValue: string | undefined) => {
+    if (onChange && newValue !== undefined) {
+      onChange(newValue)
+    }
+  }
+
+  return (
+    <Editor
+      height="100%"
+      language={language}
+      value={value}
+      theme={theme}
+      onChange={handleChange}
+      beforeMount={handleEditorWillMount}
+      onMount={handleEditorDidMount}
+      loading={
+        <div className="flex h-full items-center justify-center">
+          <div className="text-sm text-muted-foreground">Cargando editor...</div>
+        </div>
       }
-
-      resizeTimeoutRef.current = setTimeout(() => {
-        requestAnimationFrame(() => {
-          monacoEditorRef.current?.layout()
-        })
-      }, 100)
-    })
-
-    if (editorRef.current) {
-      resizeObserver.observe(editorRef.current)
-    }
-
-    requestAnimationFrame(() => {
-      monacoEditorRef.current?.layout()
-    })
-
-    return () => {
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current)
-      }
-      resizeObserver.disconnect()
-      disposable.dispose()
-      monacoEditorRef.current?.dispose()
-    }
-  }, [monaco])
-
-  // Update editor value when prop changes
-  useEffect(() => {
-    if (monacoEditorRef.current && monacoEditorRef.current.getValue() !== value) {
-      monacoEditorRef.current.setValue(value)
-    }
-  }, [value])
-
-  // Update editor language when prop changes
-  useEffect(() => {
-    if (monacoEditorRef.current && monaco) {
-      const model = monacoEditorRef.current.getModel()
-      if (model) {
-        monaco.editor.setModelLanguage(model, language)
-      }
-    }
-  }, [language, monaco])
-
-  return <div ref={editorRef} className="h-full w-full" />
+      options={{
+        fontSize: 14,
+        fontFamily: '"Fira Code", "Cascadia Code", "Consolas", "Monaco", "Courier New", monospace',
+        fontLigatures: true,
+        lineNumbers: "on",
+        minimap: { enabled: true },
+        automaticLayout: true,
+        wordWrap: "on",
+        scrollBeyondLastLine: false,
+      }}
+    />
+  )
 }
