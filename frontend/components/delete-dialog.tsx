@@ -43,11 +43,11 @@ export function DeleteDialog({
           <AlertDialogDescription>
             Esta acción no se puede deshacer. Esto eliminará permanentemente{" "}
             {itemType === "folder" && "la carpeta y todo su contenido"}
-            {itemType === "file" && "el archivo"}:
-            <div className="mt-2 rounded-md bg-muted p-2">
-              <code className="text-sm font-mono">{itemName}</code>
-            </div>
+            {itemType === "file" && "el archivo"}.
           </AlertDialogDescription>
+          <div className="mt-2 rounded-md bg-muted p-2">
+            <code className="text-sm font-mono">{itemName}</code>
+          </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
