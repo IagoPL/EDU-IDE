@@ -8,11 +8,13 @@ import { Toolbar } from "./toolbar"
 import { StatusBar } from "./status-bar"
 import { CommandPalette } from "./command-palette"
 import { QuickOpen } from "./quick-open"
+import { TerminalPanel } from "./terminal-panel"
 import { api } from "@/lib/api"
 
 export function IDELayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [rightPanelOpen, setRightPanelOpen] = useState(true)
+  const [terminalOpen, setTerminalOpen] = useState(false)
   const [activeFile, setActiveFile] = useState<string | null>(null)
   const [allFiles, setAllFiles] = useState<string[]>([])
   const [recentFiles, setRecentFiles] = useState<string[]>([])
@@ -70,7 +72,10 @@ export function IDELayout() {
         // TODO: Implementar guardar
         break
       case "view.terminal":
-        // TODO: Mostrar terminal
+        setTerminalOpen(true)
+        break
+      case "view.explorer":
+        setSidebarOpen(true)
         break
       // ... más comandos
     }
@@ -100,29 +105,38 @@ export function IDELayout() {
         onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
       />
 
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Left Sidebar */}
-        {sidebarOpen && (
-          <div className="w-64 flex-shrink-0 border-r border-border">
-            <Sidebar activeFile={activeFile} onFileSelect={handleFileOpen} />
-          </div>
-        )}
+      <div className="flex flex-1 min-h-0 overflow-hidden flex-col">
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          {/* Left Sidebar */}
+          {sidebarOpen && (
+            <div className="w-64 flex-shrink-0 border-r border-border">
+              <Sidebar activeFile={activeFile} onFileSelect={handleFileOpen} />
+            </div>
+          )}
 
-        {/* Editor Area - takes remaining space */}
-        <div className="flex-1 min-w-0 overflow-hidden">
-          <EditorArea activeFile={activeFile} />
+          {/* Editor Area - takes remaining space */}
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <EditorArea activeFile={activeFile} />
+          </div>
+
+          {/* Right Panel */}
+          {rightPanelOpen && (
+            <div className="w-80 flex-shrink-0 border-l border-border">
+              <RightPanel />
+            </div>
+          )}
         </div>
 
-        {/* Right Panel */}
-        {rightPanelOpen && (
-          <div className="w-80 flex-shrink-0 border-l border-border">
-            <RightPanel />
+        {/* Terminal Panel */}
+        {terminalOpen && (
+          <div className="h-64 flex-shrink-0">
+            <TerminalPanel onClose={() => setTerminalOpen(false)} />
           </div>
         )}
       </div>
 
       {/* Status Bar */}
-      <StatusBar activeFile={activeFile} />
+      <StatusBar activeFile={activeFile} terminalOpen={terminalOpen} onToggleTerminal={() => setTerminalOpen(!terminalOpen)} />
     </div>
   )
 }

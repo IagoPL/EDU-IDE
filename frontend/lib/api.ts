@@ -232,6 +232,32 @@ class ApiClient {
   async getTemplates(): Promise<ApiResponse<any[]>> {
     return this.request<any[]>('/api/projects/templates/list');
   }
+
+  // Terminal API
+  async executeCommand(command: string, sessionId?: string): Promise<ApiResponse<{ output: string; error?: string; exitCode?: number }>> {
+    return this.request('/api/terminal/execute', {
+      method: 'POST',
+      body: JSON.stringify({ command, sessionId }),
+    });
+  }
+
+  async executeCode(code: string, language: string, filename?: string): Promise<ApiResponse<{ output: string; error?: string; exitCode?: number }>> {
+    return this.request('/api/terminal/execute-code', {
+      method: 'POST',
+      body: JSON.stringify({ code, language, filename }),
+    });
+  }
+
+  async installDependencies(projectPath: string, packageManager?: 'npm' | 'yarn' | 'pnpm' | 'pip'): Promise<ApiResponse<{ output: string; error?: string }>> {
+    return this.request('/api/terminal/install-dependencies', {
+      method: 'POST',
+      body: JSON.stringify({ projectPath, packageManager }),
+    });
+  }
+
+  async detectPackageManager(path: string): Promise<ApiResponse<{ packageManager: string | null }>> {
+    return this.request(`/api/terminal/detect-package-manager?path=${encodeURIComponent(path)}`);
+  }
 }
 
 export const api = new ApiClient();

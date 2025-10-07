@@ -1,12 +1,15 @@
 "use client"
 
-import { Circle, GitBranch, AlertCircle, CheckCircle } from "lucide-react"
+import { Circle, GitBranch, AlertCircle, CheckCircle, Terminal } from "lucide-react"
+import { Button } from "./ui/button"
 
 interface StatusBarProps {
   activeFile: string | null
+  terminalOpen?: boolean
+  onToggleTerminal?: () => void
 }
 
-export function StatusBar({ activeFile }: StatusBarProps) {
+export function StatusBar({ activeFile, terminalOpen, onToggleTerminal }: StatusBarProps) {
   return (
     <div className="flex h-6 items-center justify-between border-t border-border bg-card px-4 text-xs">
       {/* Left Section */}
@@ -29,6 +32,16 @@ export function StatusBar({ activeFile }: StatusBarProps) {
 
       {/* Right Section */}
       <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleTerminal}
+          className={`h-5 px-2 text-xs ${terminalOpen ? 'bg-secondary' : ''}`}
+          title="Toggle Terminal (Ctrl+`)"
+        >
+          <Terminal className="h-3 w-3 mr-1" />
+          Terminal
+        </Button>
         {activeFile && (
           <>
             <span>{activeFile.split(".").pop()?.toUpperCase()}</span>
