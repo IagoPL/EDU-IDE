@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshCw, Plus, FolderPlus, File, Folder, Edit3, Trash2 } from "lucide-react"
+import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshCw, Plus, FolderPlus, File, Folder, Edit3, Trash2, ChevronRight, ChevronDown } from "lucide-react"
 import { Button } from "./ui/button"
 import { cn } from "@/lib/utils"
 import { api, FileNode } from "@/lib/api"
@@ -74,10 +74,13 @@ function ExplorerContent({
   const [workspace, setWorkspace] = useState<string>('')
   const [fileDialogOpen, setFileDialogOpen] = useState(false)
   const [fileDialogType, setFileDialogType] = useState<"file" | "folder">("file")
+  const [parentFolder, setParentFolder] = useState<string>("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<{ name: string; path: string; type: "file" | "folder" } | null>(null)
   const [renamingItem, setRenamingItem] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState("")
+  const [draggedItem, setDraggedItem] = useState<FileNode | null>(null)
+  const [dragOverFolder, setDragOverFolder] = useState<string | null>(null)
   const { toast } = useToast()
 
   // Cargar el árbol de archivos
@@ -129,31 +132,44 @@ function ExplorerContent({
     setExpandedFolders(newExpanded)
   }
 
-  const createNewFile = () => {
+  const createNewFile = (folder: string = "") => {
+    setParentFolder(folder)
     setFileDialogType("file")
     setFileDialogOpen(true)
   }
 
-  const createNewFolder = () => {
+  const createNewFolder = (folder: string = "") => {
+    setParentFolder(folder)
     setFileDialogType("folder")
     setFileDialogOpen(true)
   }
 
   const handleFileDialogConfirm = async (name: string) => {
     try {
+      // Construir la ruta completa con el parent folder
+      const fullPath = parentFolder ? `${parentFolder}/${name}` : name
+      
       if (fileDialogType === "file") {
-        const response = await api.createFile(name, '')
+        const response = await api.createFile(fullPath, '')
         if (response.success) {
           await loadFileTree()
+          // Expandir la carpeta padre si existe
+          if (parentFolder) {
+            setExpandedFolders(prev => new Set([...prev, parentFolder]))
+          }
           toast({
             title: "Archivo creado",
             description: `${name} se ha creado correctamente`,
           })
         }
       } else {
-        const response = await api.createDirectory(name)
+        const response = await api.createDirectory(fullPath)
         if (response.success) {
           await loadFileTree()
+          // Expandir la carpeta padre si existe
+          if (parentFolder) {
+            setExpandedFolders(prev => new Set([...prev, parentFolder]))
+          }
           toast({
             title: "Carpeta creada",
             description: `${name} se ha creado correctamente`,
@@ -167,6 +183,8 @@ function ExplorerContent({
         variant: "destructive",
       })
       throw error
+    } finally {
+      setParentFolder("")
     }
   }
 
@@ -242,6 +260,61 @@ function ExplorerContent({
     }
   }
 
+  const handleDragStart = (item: FileNode) => {
+    setDraggedItem(item)
+  }
+
+  const handleDragOver = (e: React.DragEvent, folderPath: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOverFolder(folderPath)
+  }
+
+  const handleDragLeave = () => {
+    setDragOverFolder(null)
+  }
+
+  const handleDrop = async (e: React.DragEvent, targetFolder: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!draggedItem) return
+
+    try {
+      // No mover si es la misma carpeta
+      const currentFolder = draggedItem.path.split('/').slice(0, -1).join('/')
+      if (currentFolder === targetFolder) {
+        setDraggedItem(null)
+        setDragOverFolder(null)
+        return
+      }
+
+      // Construir la nueva ruta
+      const fileName = draggedItem.path.split('/').pop()
+      const newPath = targetFolder ? `${targetFolder}/${fileName}` : fileName
+
+      const response = await api.renameFile(draggedItem.path, newPath)
+      if (response.success) {
+        await loadFileTree()
+        // Expandir la carpeta de destino
+        setExpandedFolders(prev => new Set([...prev, targetFolder]))
+        toast({
+          title: "Movido",
+          description: `${fileName} se ha movido correctamente`,
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo mover el elemento",
+        variant: "destructive",
+      })
+    } finally {
+      setDraggedItem(null)
+      setDragOverFolder(null)
+    }
+  }
+
   return (
     <div className="space-y-1">
       <div className="mb-2 flex items-center justify-between px-2">
@@ -302,6 +375,13 @@ function ExplorerContent({
             renameValue={renameValue}
             setRenameValue={setRenameValue}
             confirmRename={confirmRename}
+            onCreateFile={createNewFile}
+            onCreateFolder={createNewFolder}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            dragOverFolder={dragOverFolder}
           />
         ))
       )}
@@ -311,6 +391,7 @@ function ExplorerContent({
         onOpenChange={setFileDialogOpen}
         type={fileDialogType}
         onConfirm={handleFileDialogConfirm}
+        parentPath={parentFolder}
       />
 
       {itemToDelete && (
@@ -339,6 +420,13 @@ interface FileTreeItemProps {
   renameValue: string
   setRenameValue: (value: string) => void
   confirmRename: (path: string) => void
+  onCreateFile: (folder: string) => void
+  onCreateFolder: (folder: string) => void
+  onDragStart: (item: FileNode) => void
+  onDragOver: (e: React.DragEvent, folderPath: string) => void
+  onDragLeave: () => void
+  onDrop: (e: React.DragEvent, targetFolder: string) => void
+  dragOverFolder: string | null
 }
 
 function FileTreeItem({ 
@@ -353,11 +441,19 @@ function FileTreeItem({
   renamingItem,
   renameValue,
   setRenameValue,
-  confirmRename
+  confirmRename,
+  onCreateFile,
+  onCreateFolder,
+  onDragStart,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  dragOverFolder
 }: FileTreeItemProps) {
   const isExpanded = expandedFolders.has(item.path)
   const isActive = activeFile === item.path
   const isRenaming = renamingItem === item.path
+  const isDragOver = dragOverFolder === item.path
 
   if (item.type === "directory") {
     return (
@@ -366,8 +462,8 @@ function FileTreeItem({
           isFolder={true}
           onRename={() => onRename(item)}
           onDelete={() => onDelete(item)}
-          onNewFile={() => {}}
-          onNewFolder={() => {}}
+          onNewFile={() => onCreateFile(item.path)}
+          onNewFolder={() => onCreateFolder(item.path)}
         >
           {isRenaming ? (
             <div style={{ paddingLeft: `${level * 12 + 8}px` }} className="px-2 py-1">
@@ -385,18 +481,50 @@ function FileTreeItem({
             </div>
           ) : (
             <div
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation()
+                onDragStart(item)
+              }}
+              onDragOver={(e) => onDragOver(e, item.path)}
+              onDragLeave={onDragLeave}
+              onDrop={(e) => onDrop(e, item.path)}
               className={cn(
-                "group relative flex w-full cursor-pointer items-center justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-accent",
+                "group relative flex w-full cursor-pointer items-center justify-start rounded-md px-2 py-1 text-sm transition-all duration-200 hover:bg-accent",
                 isActive && "border-l-2 border-primary bg-accent",
+                isDragOver && "bg-accent/50 border-2 border-dashed border-primary",
               )}
               style={{ paddingLeft: `${level * 12 + 8}px` }}
               onClick={() => toggleFolder(item.path)}
             >
-              <Folder
-                className={cn("mr-2 h-4 w-4 text-yellow-500 transition-transform", !isExpanded && "rotate-[-90deg]")}
-              />
-              <span className="truncate">{item.name}</span>
-              <div className="ml-auto flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+              {isExpanded ? (
+                <ChevronDown className="mr-1 h-3 w-3 text-muted-foreground transition-transform duration-200" />
+              ) : (
+                <ChevronRight className="mr-1 h-3 w-3 text-muted-foreground transition-transform duration-200" />
+              )}
+              <Folder className="mr-2 h-4 w-4 text-yellow-500" />
+              <span className="truncate flex-1">{item.name}</span>
+              <div className="ml-auto flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onCreateFile(item.path)
+                  }}
+                  className="rounded p-0.5 hover:bg-background"
+                  title="Nuevo archivo"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onCreateFolder(item.path)
+                  }}
+                  className="rounded p-0.5 hover:bg-background"
+                  title="Nueva carpeta"
+                >
+                  <FolderPlus className="h-3 w-3" />
+                </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
@@ -421,27 +549,37 @@ function FileTreeItem({
             </div>
           )}
         </FileContextMenu>
-        {isExpanded && item.children && (
-          <div>
-            {item.children.map((child: FileNode) => (
-              <FileTreeItem
-                key={child.path}
-                item={child}
-                level={level + 1}
-                expandedFolders={expandedFolders}
-                toggleFolder={toggleFolder}
-                activeFile={activeFile}
-                onFileSelect={onFileSelect}
-                onDelete={onDelete}
-                onRename={onRename}
-                renamingItem={renamingItem}
-                renameValue={renameValue}
-                setRenameValue={setRenameValue}
-                confirmRename={confirmRename}
-              />
-            ))}
-          </div>
-        )}
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-300 ease-in-out",
+            isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+          )}
+        >
+          {item.children && item.children.map((child: FileNode) => (
+            <FileTreeItem
+              key={child.path}
+              item={child}
+              level={level + 1}
+              expandedFolders={expandedFolders}
+              toggleFolder={toggleFolder}
+              activeFile={activeFile}
+              onFileSelect={onFileSelect}
+              onDelete={onDelete}
+              onRename={onRename}
+              renamingItem={renamingItem}
+              renameValue={renameValue}
+              setRenameValue={setRenameValue}
+              confirmRename={confirmRename}
+              onCreateFile={onCreateFile}
+              onCreateFolder={onCreateFolder}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              dragOverFolder={dragOverFolder}
+            />
+          ))}
+        </div>
       </div>
     )
   }
@@ -468,16 +606,21 @@ function FileTreeItem({
         </div>
       ) : (
         <div
+          draggable
+          onDragStart={(e) => {
+            e.stopPropagation()
+            onDragStart(item)
+          }}
           className={cn(
-            "group relative flex w-full cursor-pointer items-center justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-accent",
+            "group relative flex w-full cursor-pointer items-center justify-start rounded-md px-2 py-1 text-sm transition-all duration-200 hover:bg-accent",
             isActive && "border-l-2 border-primary bg-accent",
           )}
           style={{ paddingLeft: `${level * 12 + 24}px` }}
           onClick={() => onFileSelect(item.path)}
         >
           <FileIcon filename={item.name} />
-          <span className="truncate">{item.name}</span>
-          <div className="ml-auto flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <span className="truncate flex-1">{item.name}</span>
+          <div className="ml-auto flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
             <button
               onClick={(e) => {
                 e.stopPropagation()
