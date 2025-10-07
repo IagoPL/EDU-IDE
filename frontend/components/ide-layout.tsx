@@ -25,11 +25,21 @@ export function IDELayout() {
   const [activeFile, setActiveFile] = useState<string | null>(null)
   const [allFiles, setAllFiles] = useState<string[]>([])
   const [recentFiles, setRecentFiles] = useState<string[]>([])
+  const [workspaceKey, setWorkspaceKey] = useState(0) // Key para forzar re-render
 
   // Cargar lista de todos los archivos para Quick Open
   useEffect(() => {
     loadAllFiles()
-  }, [])
+  }, [workspaceKey]) // Recargar cuando cambie el workspace
+
+  const handleWorkspaceChanged = () => {
+    // Incrementar el key para forzar re-render del sidebar y recargar archivos
+    setWorkspaceKey(prev => prev + 1)
+    setActiveFile(null) // Cerrar archivo activo
+    setAllFiles([])
+    setRecentFiles([])
+    loadAllFiles()
+  }
 
   const loadAllFiles = async () => {
     const response = await api.getFileTree()
@@ -109,6 +119,7 @@ export function IDELayout() {
         rightPanelOpen={rightPanelOpen}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
+        onWorkspaceChanged={handleWorkspaceChanged}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden flex-col">
@@ -116,7 +127,7 @@ export function IDELayout() {
           {/* Left Sidebar */}
           {sidebarOpen && (
             <div className="w-64 flex-shrink-0 border-r border-border">
-              <Sidebar activeFile={activeFile} onFileSelect={handleFileOpen} />
+              <Sidebar key={workspaceKey} activeFile={activeFile} onFileSelect={handleFileOpen} />
             </div>
           )}
 

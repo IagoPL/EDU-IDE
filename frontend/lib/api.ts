@@ -195,6 +195,20 @@ class ApiClient {
     return this.request<{ path: string }>('/api/files/workspace');
   }
 
+  async setWorkspace(path: string): Promise<ApiResponse<{ path: string }>> {
+    return this.request<{ path: string }>('/api/files/workspace', {
+      method: 'POST',
+      body: JSON.stringify({ path }),
+    });
+  }
+
+  async validatePath(path: string): Promise<ApiResponse<{ valid: boolean; reason?: string }>> {
+    return this.request<{ valid: boolean; reason?: string }>('/api/files/validate-path', {
+      method: 'POST',
+      body: JSON.stringify({ path }),
+    });
+  }
+
   // Projects API
   async getProjects(): Promise<ApiResponse<any[]>> {
     return this.request<any[]>('/api/projects');

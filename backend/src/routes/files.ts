@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { FileSystemService } from '../services/FileSystemService';
+import path from 'path';
+import { existsSync } from 'fs';
 
 const router = Router();
 const fileSystemService = new FileSystemService();
@@ -186,6 +188,68 @@ router.post('/set-workspace', async (req, res) => {
 // Obtener workspace actual
 router.get('/workspace', (req, res) => {
   res.json({ success: true, data: { path: fileSystemService.getWorkspacePath() } });
+});
+
+// Cambiar workspace
+router.post('/workspace', async (req, res) => {
+  try {
+    const { path: workspacePath } = req.body;
+    
+    if (!workspacePath) {
+      return res.status(400).json({ success: false, error: 'Workspace path is required' });
+    }
+
+    // Verificar que la ruta existe
+    if (!existsSync(workspacePath)) {
+      return res.status(400).json({ success: false, error: 'Workspace path does not exist' });
+    }
+
+    // Verificar que es un directorio
+    const stats = await import('fs/promises').then(fs => fs.stat(workspacePath));
+    if (!stats.isDirectory()) {
+      return res.status(400).json({ success: false, error: 'Path is not a directory' });
+    }
+
+    // Cambiar el workspace
+    fileSystemService.setWorkspace(workspacePath);
+    
+    res.json({ 
+      success: true, 
+      data: { path: fileSystemService.getWorkspacePath() } 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+// Validar si una ruta existe y es un directorio
+router.post('/validate-path', async (req, res) => {
+  try {
+    const { path: dirPath } = req.body;
+    
+    if (!dirPath) {
+      return res.status(400).json({ success: false, error: 'Path is required' });
+    }
+
+    if (!existsSync(dirPath)) {
+      return res.json({ success: true, data: { valid: false, reason: 'Path does not exist' } });
+    }
+
+    const stats = await import('fs/promises').then(fs => fs.stat(dirPath));
+    if (!stats.isDirectory()) {
+      return res.json({ success: true, data: { valid: false, reason: 'Path is not a directory' } });
+    }
+
+    res.json({ success: true, data: { valid: true } });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
 });
 
 export default router;

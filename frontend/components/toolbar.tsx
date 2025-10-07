@@ -1,23 +1,51 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "./ui/button"
-import { PanelLeftClose, PanelRightClose, Play, Square, RotateCcw, Settings, User } from "lucide-react"
+import { PanelLeftClose, PanelRightClose, Play, Square, RotateCcw, Settings, User, FolderOpen } from "lucide-react"
 import { ThemeSwitcher } from "./theme-switcher"
+import { OpenFolderDialog } from "./open-folder-dialog"
+import { useToast } from "@/hooks/use-toast"
 
 interface ToolbarProps {
   sidebarOpen: boolean
   rightPanelOpen: boolean
   onToggleSidebar: () => void
   onToggleRightPanel: () => void
+  onWorkspaceChanged?: () => void
 }
 
-export function Toolbar({ sidebarOpen, rightPanelOpen, onToggleSidebar, onToggleRightPanel }: ToolbarProps) {
+export function Toolbar({ sidebarOpen, rightPanelOpen, onToggleSidebar, onToggleRightPanel, onWorkspaceChanged }: ToolbarProps) {
+  const [openFolderDialogOpen, setOpenFolderDialogOpen] = useState(false)
+  const { toast } = useToast()
+
+  const handleFolderOpened = (path: string) => {
+    toast({
+      title: "Carpeta abierta",
+      description: `Ahora trabajando en: ${path}`,
+    })
+    onWorkspaceChanged?.()
+  }
+
   return (
     <div className="flex h-12 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur-sm">
       {/* Left Section */}
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" onClick={onToggleSidebar} className="gap-2">
           <PanelLeftClose className={`h-4 w-4 transition-transform ${!sidebarOpen ? "rotate-180" : ""}`} />
+        </Button>
+
+        <div className="mx-2 h-6 w-px bg-border" />
+
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => setOpenFolderDialogOpen(true)}
+          className="gap-2"
+          title="Abrir carpeta"
+        >
+          <FolderOpen className="h-4 w-4" />
+          Abrir Carpeta
         </Button>
 
         <div className="mx-2 h-6 w-px bg-border" />
@@ -59,6 +87,12 @@ export function Toolbar({ sidebarOpen, rightPanelOpen, onToggleSidebar, onToggle
           <PanelRightClose className={`h-4 w-4 transition-transform ${!rightPanelOpen ? "rotate-180" : ""}`} />
         </Button>
       </div>
+
+      <OpenFolderDialog
+        open={openFolderDialogOpen}
+        onOpenChange={setOpenFolderDialogOpen}
+        onFolderOpened={handleFolderOpened}
+      />
     </div>
   )
 }
