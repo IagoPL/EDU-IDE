@@ -149,14 +149,18 @@ function ExplorerContent({
       // Construir la ruta completa con el parent folder
       const fullPath = parentFolder ? `${parentFolder}/${name}` : name
       
+      // Guardar las carpetas expandidas actuales
+      const currentExpanded = new Set(expandedFolders)
+      if (parentFolder) {
+        currentExpanded.add(parentFolder)
+      }
+      
       if (fileDialogType === "file") {
         const response = await api.createFile(fullPath, '')
         if (response.success) {
           await loadFileTree()
-          // Expandir la carpeta padre si existe
-          if (parentFolder) {
-            setExpandedFolders(prev => new Set([...prev, parentFolder]))
-          }
+          // Restaurar y mantener las carpetas expandidas
+          setExpandedFolders(currentExpanded)
           toast({
             title: "Archivo creado",
             description: `${name} se ha creado correctamente`,
@@ -166,10 +170,8 @@ function ExplorerContent({
         const response = await api.createDirectory(fullPath)
         if (response.success) {
           await loadFileTree()
-          // Expandir la carpeta padre si existe
-          if (parentFolder) {
-            setExpandedFolders(prev => new Set([...prev, parentFolder]))
-          }
+          // Restaurar y mantener las carpetas expandidas
+          setExpandedFolders(currentExpanded)
           toast({
             title: "Carpeta creada",
             description: `${name} se ha creado correctamente`,
@@ -201,10 +203,16 @@ function ExplorerContent({
     if (!itemToDelete) return
 
     try {
+      // Guardar las carpetas expandidas actuales
+      const currentExpanded = new Set(expandedFolders)
+      
       if (itemToDelete.type === "folder") {
         const response = await api.deleteDirectory(itemToDelete.path)
         if (response.success) {
+          // Eliminar la carpeta borrada de las expandidas
+          currentExpanded.delete(itemToDelete.path)
           await loadFileTree()
+          setExpandedFolders(currentExpanded)
           toast({
             title: "Carpeta eliminada",
             description: `${itemToDelete.name} se ha eliminado correctamente`,
@@ -214,6 +222,7 @@ function ExplorerContent({
         const response = await api.deleteFile(itemToDelete.path)
         if (response.success) {
           await loadFileTree()
+          setExpandedFolders(currentExpanded)
           toast({
             title: "Archivo eliminado",
             description: `${itemToDelete.name} se ha eliminado correctamente`,
@@ -241,10 +250,21 @@ function ExplorerContent({
     }
 
     try {
+      // Guardar las carpetas expandidas actuales
+      const currentExpanded = new Set(expandedFolders)
+      
       const newPath = oldPath.replace(/[^/]+$/, renameValue)
+      
+      // Si es una carpeta renombrada, actualizar su path en expandedFolders
+      if (currentExpanded.has(oldPath)) {
+        currentExpanded.delete(oldPath)
+        currentExpanded.add(newPath)
+      }
+      
       const response = await api.renameFile(oldPath, newPath)
       if (response.success) {
         await loadFileTree()
+        setExpandedFolders(currentExpanded)
         setRenamingItem(null)
         toast({
           title: "Renombrado",
@@ -289,6 +309,10 @@ function ExplorerContent({
         return
       }
 
+      // Guardar las carpetas expandidas actuales más la carpeta de destino
+      const currentExpanded = new Set(expandedFolders)
+      currentExpanded.add(targetFolder)
+
       // Construir la nueva ruta
       const fileName = draggedItem.path.split('/').pop()
       const newPath = targetFolder ? `${targetFolder}/${fileName}` : fileName
@@ -296,8 +320,8 @@ function ExplorerContent({
       const response = await api.renameFile(draggedItem.path, newPath)
       if (response.success) {
         await loadFileTree()
-        // Expandir la carpeta de destino
-        setExpandedFolders(prev => new Set([...prev, targetFolder]))
+        // Restaurar y mantener las carpetas expandidas
+        setExpandedFolders(currentExpanded)
         toast({
           title: "Movido",
           description: `${fileName} se ha movido correctamente`,
