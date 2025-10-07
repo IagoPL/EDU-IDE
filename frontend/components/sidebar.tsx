@@ -384,11 +384,9 @@ function FileTreeItem({
               />
             </div>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
+            <div
               className={cn(
-                "w-full justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-accent",
+                "group relative flex w-full cursor-pointer items-center justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-accent",
                 isActive && "border-l-2 border-primary bg-accent",
               )}
               style={{ paddingLeft: `${level * 12 + 8}px` }}
@@ -398,7 +396,7 @@ function FileTreeItem({
                 className={cn("mr-2 h-4 w-4 text-yellow-500 transition-transform", !isExpanded && "rotate-[-90deg]")}
               />
               <span className="truncate">{item.name}</span>
-              <div className="ml-auto flex gap-1 opacity-0 group-hover:opacity-100">
+              <div className="ml-auto flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
@@ -420,7 +418,7 @@ function FileTreeItem({
                   <Trash2 className="h-3 w-3 text-destructive" />
                 </button>
               </div>
-            </Button>
+            </div>
           )}
         </FileContextMenu>
         {isExpanded && item.children && (
@@ -469,11 +467,9 @@ function FileTreeItem({
           />
         </div>
       ) : (
-        <Button
-          variant="ghost"
-          size="sm"
+        <div
           className={cn(
-            "group w-full justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-accent",
+            "group relative flex w-full cursor-pointer items-center justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-accent",
             isActive && "border-l-2 border-primary bg-accent",
           )}
           style={{ paddingLeft: `${level * 12 + 24}px` }}
@@ -481,7 +477,7 @@ function FileTreeItem({
         >
           <FileIcon filename={item.name} />
           <span className="truncate">{item.name}</span>
-          <div className="ml-auto flex gap-1 opacity-0 group-hover:opacity-100">
+          <div className="ml-auto flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -503,7 +499,7 @@ function FileTreeItem({
               <Trash2 className="h-3 w-3 text-destructive" />
             </button>
           </div>
-        </Button>
+        </div>
       )}
     </FileContextMenu>
   )
