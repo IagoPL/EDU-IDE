@@ -1,9 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Terminal as XTerm } from "@xterm/xterm"
-import { FitAddon } from "@xterm/addon-fit"
-import { WebLinksAddon } from "@xterm/addon-web-links"
 import "@xterm/xterm/css/xterm.css"
 import { X } from "lucide-react"
 import { Button } from "./ui/button"
@@ -16,17 +13,28 @@ interface TerminalProps {
 
 export function Terminal({ onCommand, onClose, title = "Terminal" }: TerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null)
-  const xtermRef = useRef<XTerm | null>(null)
-  const fitAddonRef = useRef<FitAddon | null>(null)
+  const xtermRef = useRef<any | null>(null)
+  const fitAddonRef = useRef<any | null>(null)
   const [currentLine, setCurrentLine] = useState("")
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    if (!terminalRef.current) return
+    if (!terminalRef.current || isLoaded) return
 
-    // Crear instancia de xterm
-    const term = new XTerm({
+    // Importación dinámica solo en cliente
+    Promise.all([
+      import("@xterm/xterm").then(mod => mod.Terminal),
+      import("@xterm/addon-fit").then(mod => mod.FitAddon),
+      import("@xterm/addon-web-links").then(mod => mod.WebLinksAddon)
+    ]).then(([XTerm, FitAddon, WebLinksAddon]) => {
+      if (!terminalRef.current) return
+      
+      setIsLoaded(true)
+
+      // Crear instancia de xterm
+      const term = new XTerm({
       cursorBlink: true,
       cursorStyle: "bar",
       fontSize: 14,
@@ -168,13 +176,22 @@ export function Terminal({ onCommand, onClose, title = "Terminal" }: TerminalPro
       fitAddon.fit()
     }
 
-    window.addEventListener("resize", handleResize)
+      window.addEventListener("resize", handleResize)
+
+      return () => {
+        window.removeEventListener("resize", handleResize)
+        term.dispose()
+      }
+    }).catch(error => {
+      console.error("Error cargando terminal:", error)
+    })
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-      term.dispose()
+      if (xtermRef.current) {
+        xtermRef.current.dispose()
+      }
     }
-  }, [])
+  }, [isLoaded])
 
   // Actualizar historial cuando cambia
   useEffect(() => {
@@ -183,7 +200,7 @@ export function Terminal({ onCommand, onClose, title = "Terminal" }: TerminalPro
     }
   }, [historyIndex])
 
-  const writePrompt = (term: XTerm) => {
+  const writePrompt = (term: any) => {
     term.write("\r\n\x1b[32m$\x1b[0m ")
   }
 
@@ -234,8 +251,13 @@ export function Terminal({ onCommand, onClose, title = "Terminal" }: TerminalPro
   )
 }
 
-// Exportar métodos públicos como utilidades
-export const createTerminal = (container: HTMLElement) => {
+// Exportar métodos públicos como utilidades (solo cliente)
+export const createTerminal = async (container: HTMLElement) => {
+  const [XTerm, FitAddon] = await Promise.all([
+    import("@xterm/xterm").then(mod => mod.Terminal),
+    import("@xterm/addon-fit").then(mod => mod.FitAddon)
+  ])
+  
   const term = new XTerm({
     cursorBlink: true,
     fontSize: 14,
