@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import filesRouter from './routes/files';
 import projectsRouter from './routes/projects';
+import terminalRouter from './routes/terminal';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.get('/api', (req, res) => {
       api: '/api',
       files: '/api/files',
       projects: '/api/projects',
+      terminal: '/api/terminal',
       ai: '/api/ai'
     }
   });
@@ -36,6 +38,7 @@ app.get('/api', (req, res) => {
 // API Routes
 app.use('/api/files', filesRouter);
 app.use('/api/projects', projectsRouter);
+app.use('/api/terminal', terminalRouter);
 
 // Start server
 app.listen(PORT, () => {
@@ -45,6 +48,7 @@ app.listen(PORT, () => {
   console.log(`   - API Info: http://localhost:${PORT}/api`);
   console.log(`   - Projects: http://localhost:${PORT}/api/projects`);
   console.log(`   - Files: http://localhost:${PORT}/api/files`);
+  console.log(`   - Terminal: http://localhost:${PORT}/api/terminal`);
 });
 
 
