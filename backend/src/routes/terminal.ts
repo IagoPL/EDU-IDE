@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { TerminalService } from '../services/TerminalService';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const router = Router();
 const terminalService = new TerminalService(path.join(__dirname, '../../workspace'));

@@ -18,8 +18,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "axios": "^1.7.9",
-    "ws": "^8.18.0",
-    "node-pty": "^1.0.0"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
