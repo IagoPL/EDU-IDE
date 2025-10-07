@@ -14,7 +14,7 @@
 | **Gestión de Proyectos** | 9 | 0 | 9 | 18 |
 | **Asistente IA** | 0 | 0 | 18 | 18 |
 | **Terminal Integrado** | 6 | 0 | 6 | 12 |
-| **Git Integration** | 0 | 0 | 15 | 15 |
+| **Git Integration** | 8 | 0 | 7 | 15 |
 | **Debugging** | 0 | 0 | 12 | 12 |
 | **Testing** | 0 | 0 | 10 | 10 |
 | **UI/UX** | 14 | 0 | 6 | 20 |
@@ -25,9 +25,9 @@
 | **Accesibilidad** | 2 | 0 | 8 | 10 |
 | **Rendimiento** | 5 | 0 | 5 | 10 |
 | **Seguridad** | 1 | 0 | 9 | 10 |
-| **TOTAL** | **63** | **0** | **147** | **210** |
+| **TOTAL** | **71** | **0** | **139** | **210** |
 
-**Progreso global**: 30% completado
+**Progreso global**: 33.8% completado
 
 ### 🎉 Sprint 1 Completado (7 Oct 2025)
 - ✅ Sistema de caché de archivos
@@ -42,6 +42,16 @@
 - ✅ Ejecución de código (JS/TS/Python/Java/C/C++)
 - ✅ Gestor de dependencias (npm/yarn/pnpm/pip)
 - ✅ Sistema de temas (light/dark/system)
+
+### 🎉 Sprint 3 Completado (7 Oct 2025)
+- ✅ Integración Git con simple-git
+- ✅ Visualización de estado de archivos (modified, staged, untracked)
+- ✅ Git add (stage individual y stage all)
+- ✅ Git commit con mensaje
+- ✅ Git push / pull
+- ✅ Visualizador de diff básico (API)
+- ✅ Historial de commits con detalles
+- ✅ Gestión de branches (crear, cambiar, eliminar)
 
 ---
 
@@ -441,48 +451,64 @@
 # CATEGORÍA 6: GIT INTEGRATION
 
 ## 🎯 PRIORIDAD: 2 (ALTA)
-## 📊 PROGRESO: 0% (0/15)
+## 📊 PROGRESO: 53.3% (8/15)
 
 ### ⏳ PENDIENTES PRIORIDAD ALTA (8)
 
-- [ ] **6.1** Integración con libgit2 o simple-git
+- [x] **6.1** Integración con libgit2 o simple-git
   - **Prioridad**: Alta
   - **Estimación**: 20 horas
+  - **✅ Completado**: Sprint 3 (7 Oct 2025)
+  - **Implementación**: simple-git integrado en GitService
 
-- [ ] **6.2** Visualización de estado de Git (modified, staged, etc.)
+- [x] **6.2** Visualización de estado de Git (modified, staged, etc.)
   - **Prioridad**: Alta
   - **Estimación**: 12 horas
   - **Dependencias**: 6.1
+  - **✅ Completado**: Sprint 3 (7 Oct 2025)
+  - **Implementación**: GitPanel con UI completa de estados
 
-- [ ] **6.3** Git add (stage files)
+- [x] **6.3** Git add (stage files)
   - **Prioridad**: Alta
   - **Estimación**: 6 horas
   - **Dependencias**: 6.1
+  - **✅ Completado**: Sprint 3 (7 Oct 2025)
+  - **Implementación**: Stage individual y stage all
 
-- [ ] **6.4** Git commit con mensaje
+- [x] **6.4** Git commit con mensaje
   - **Prioridad**: Alta
   - **Estimación**: 8 horas
   - **Dependencias**: 6.3
+  - **✅ Completado**: Sprint 3 (7 Oct 2025)
+  - **Implementación**: UI de commit con mensaje
 
-- [ ] **6.5** Git push / pull
+- [x] **6.5** Git push / pull
   - **Prioridad**: Alta
   - **Estimación**: 12 horas
   - **Dependencias**: 6.4
+  - **✅ Completado**: Sprint 3 (7 Oct 2025)
+  - **Implementación**: Botones push/pull integrados
 
-- [ ] **6.6** Visualizador de diff (cambios)
+- [x] **6.6** Visualizador de diff (cambios)
   - **Prioridad**: Alta
   - **Estimación**: 20 horas
   - **Dependencias**: 6.2
+  - **✅ Completado**: Sprint 3 (7 Oct 2025)
+  - **Implementación**: API endpoint para diff (UI básica)
 
-- [ ] **6.7** Historial de commits
+- [x] **6.7** Historial de commits
   - **Prioridad**: Alta
   - **Estimación**: 16 horas
   - **Dependencias**: 6.1
+  - **✅ Completado**: Sprint 3 (7 Oct 2025)
+  - **Implementación**: Tab de commits con historial completo
 
-- [ ] **6.8** Gestión de branches (crear, cambiar, eliminar)
+- [x] **6.8** Gestión de branches (crear, cambiar, eliminar)
   - **Prioridad**: Alta
   - **Estimación**: 16 horas
   - **Dependencias**: 6.1
+  - **✅ Completado**: Sprint 3 (7 Oct 2025)
+  - **Implementación**: Tab de branches con gestión completa
 
 ### ⏳ PENDIENTES PRIORIDAD MEDIA (7)
 

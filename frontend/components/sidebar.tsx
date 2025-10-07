@@ -5,6 +5,7 @@ import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshC
 import { Button } from "./ui/button"
 import { cn } from "@/lib/utils"
 import { api, FileNode } from "@/lib/api"
+import { GitPanel } from "./git-panel"
 
 interface SidebarProps {
   activeFile: string | null
@@ -48,7 +49,7 @@ export function Sidebar({ activeFile, onFileSelect }: SidebarProps) {
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-2">
         {activeTab === "explorer" && <ExplorerContent activeFile={activeFile} onFileSelect={onFileSelect} />}
         {activeTab === "search" && <div className="p-4 text-sm text-muted-foreground">Búsqueda en archivos...</div>}
-        {activeTab === "git" && <div className="p-4 text-sm text-muted-foreground">Control de versiones...</div>}
+        {activeTab === "git" && <GitPanel />}
         {activeTab === "settings" && <div className="p-4 text-sm text-muted-foreground">Configuración del IDE...</div>}
       </div>
     </div>

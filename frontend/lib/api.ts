@@ -258,6 +258,167 @@ class ApiClient {
   async detectPackageManager(path: string): Promise<ApiResponse<{ packageManager: string | null }>> {
     return this.request(`/api/terminal/detect-package-manager?path=${encodeURIComponent(path)}`);
   }
+
+  // ========================================
+  // GIT METHODS
+  // ========================================
+
+  /**
+   * Obtiene el estado de Git del workspace
+   */
+  async getGitStatus(): Promise<ApiResponse<{ files: Array<{ path: string; status: string; staged: boolean }> }>> {
+    return this.request('/api/git/status');
+  }
+
+  /**
+   * Inicializa un repositorio Git
+   */
+  async gitInit(): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/init', {
+      method: 'POST',
+    });
+  }
+
+  /**
+   * Agrega archivos al staging area
+   */
+  async gitAdd(files: string[]): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/add', {
+      method: 'POST',
+      body: JSON.stringify({ files }),
+    });
+  }
+
+  /**
+   * Crea un commit
+   */
+  async gitCommit(message: string): Promise<ApiResponse<{ commit: string; message: string }>> {
+    return this.request('/api/git/commit', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  }
+
+  /**
+   * Hace push al repositorio remoto
+   */
+  async gitPush(remote?: string, branch?: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/push', {
+      method: 'POST',
+      body: JSON.stringify({ remote, branch }),
+    });
+  }
+
+  /**
+   * Hace pull del repositorio remoto
+   */
+  async gitPull(remote?: string, branch?: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/pull', {
+      method: 'POST',
+      body: JSON.stringify({ remote, branch }),
+    });
+  }
+
+  /**
+   * Obtiene el historial de commits
+   */
+  async gitLog(limit?: number): Promise<ApiResponse<{ commits: Array<{ hash: string; author: string; email: string; date: string; message: string }> }>> {
+    const queryParam = limit ? `?limit=${limit}` : '';
+    return this.request(`/api/git/log${queryParam}`);
+  }
+
+  /**
+   * Obtiene la lista de branches
+   */
+  async gitGetBranches(): Promise<ApiResponse<{ branches: Array<{ name: string; current: boolean; commit: string }> }>> {
+    return this.request('/api/git/branches');
+  }
+
+  /**
+   * Crea un nuevo branch
+   */
+  async gitCreateBranch(name: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/branch/create', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+  }
+
+  /**
+   * Cambia a un branch existente
+   */
+  async gitCheckout(branch: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ branch }),
+    });
+  }
+
+  /**
+   * Elimina un branch
+   */
+  async gitDeleteBranch(name: string, force: boolean = false): Promise<ApiResponse<{ message: string }>> {
+    const queryParam = force ? '?force=true' : '';
+    return this.request(`/api/git/branch/${encodeURIComponent(name)}${queryParam}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Obtiene el diff de cambios
+   */
+  async gitDiff(file?: string, staged: boolean = false): Promise<ApiResponse<{ diff: string }>> {
+    const params = new URLSearchParams();
+    if (file) params.append('file', file);
+    if (staged) params.append('staged', 'true');
+    
+    const queryString = params.toString();
+    return this.request(`/api/git/diff${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Descarta cambios en un archivo
+   */
+  async gitDiscardChanges(file: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/discard', {
+      method: 'POST',
+      body: JSON.stringify({ file }),
+    });
+  }
+
+  /**
+   * Quita un archivo del staging area
+   */
+  async gitUnstage(file: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/unstage', {
+      method: 'POST',
+      body: JSON.stringify({ file }),
+    });
+  }
+
+  /**
+   * Obtiene los repositorios remotos
+   */
+  async gitGetRemotes(): Promise<ApiResponse<{ remotes: Array<{ name: string; url: string }> }>> {
+    return this.request('/api/git/remotes');
+  }
+
+  /**
+   * Obtiene la configuración de Git
+   */
+  async gitGetConfig(): Promise<ApiResponse<{ config: { name?: string; email?: string } }>> {
+    return this.request('/api/git/config');
+  }
+
+  /**
+   * Configura el usuario de Git
+   */
+  async gitSetConfig(name: string, email: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/config', {
+      method: 'POST',
+      body: JSON.stringify({ name, email }),
+    });
+  }
 }
 
 export const api = new ApiClient();
