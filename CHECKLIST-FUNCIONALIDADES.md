@@ -9,15 +9,15 @@
 
 | Categoría | Completado | En Progreso | Pendiente | Total |
 |-----------|------------|-------------|-----------|-------|
-| **Sistema de Archivos** | 14 | 0 | 4 | 18 |
+| **Sistema de Archivos** | 15 | 0 | 3 | 18 |
 | **Editor de Código** | 11 | 0 | 11 | 22 |
-| **Gestión de Proyectos** | 8 | 0 | 10 | 18 |
+| **Gestión de Proyectos** | 9 | 0 | 9 | 18 |
 | **Asistente IA** | 0 | 0 | 18 | 18 |
-| **Terminal Integrado** | 0 | 0 | 12 | 12 |
+| **Terminal Integrado** | 6 | 0 | 6 | 12 |
 | **Git Integration** | 0 | 0 | 15 | 15 |
 | **Debugging** | 0 | 0 | 12 | 12 |
 | **Testing** | 0 | 0 | 10 | 10 |
-| **UI/UX** | 13 | 0 | 7 | 20 |
+| **UI/UX** | 14 | 0 | 6 | 20 |
 | **Funcionalidades Educativas** | 0 | 0 | 15 | 15 |
 | **Colaboración** | 0 | 0 | 12 | 12 |
 | **Cloud & Deploy** | 0 | 0 | 10 | 10 |
@@ -25,9 +25,9 @@
 | **Accesibilidad** | 2 | 0 | 8 | 10 |
 | **Rendimiento** | 5 | 0 | 5 | 10 |
 | **Seguridad** | 1 | 0 | 9 | 10 |
-| **TOTAL** | **54** | **0** | **156** | **210** |
+| **TOTAL** | **63** | **0** | **147** | **210** |
 
-**Progreso global**: 25.7% completado
+**Progreso global**: 30% completado
 
 ### 🎉 Sprint 1 Completado (7 Oct 2025)
 - ✅ Sistema de caché de archivos
@@ -35,6 +35,13 @@
 - ✅ Quick Open (Ctrl+P)
 - ✅ Find & Replace (Ctrl+F/H)
 - ✅ Command Palette (Ctrl+Shift+P)
+
+### 🎉 Sprint 2 Completado (7 Oct 2025)
+- ✅ Terminal integrado con xterm.js
+- ✅ Ejecución de comandos del sistema
+- ✅ Ejecución de código (JS/TS/Python/Java/C/C++)
+- ✅ Gestor de dependencias (npm/yarn/pnpm/pip)
+- ✅ Sistema de temas (light/dark/system)
 
 ---
 
@@ -75,7 +82,7 @@
 # CATEGORÍA 1: SISTEMA DE ARCHIVOS
 
 ## 🎯 PRIORIDAD: 1 (CRÍTICA)
-## 📊 PROGRESO: 77.8% (14/18)
+## 📊 PROGRESO: 83.3% (15/18)
 
 ### ✅ COMPLETADAS (14)
 
@@ -100,12 +107,14 @@
   - **Archivo**: `frontend/lib/api.ts`
   - **Mejora**: 70% menos llamadas al servidor
 
-### ⏳ PENDIENTES (4)
+### ✅ COMPLETADAS (15)
 
 - [x] **1.15** ✨ **Búsqueda de archivos por nombre (Ctrl+P / Cmd+P)** - SPRINT 1
   - **COMPLETADO**: Quick Open implementado
   - **Archivo**: `frontend/components/quick-open.tsx`
   - **Características**: Búsqueda fuzzy, archivos recientes, iconos por tipo
+
+### ⏳ PENDIENTES (3)
 
 - [ ] **1.16** Búsqueda en contenido de archivos (Find in Files)
   - **Prioridad**: Alta
@@ -209,9 +218,9 @@
 # CATEGORÍA 3: GESTIÓN DE PROYECTOS
 
 ## 🎯 PRIORIDAD: 2 (ALTA)
-## 📊 PROGRESO: 44.4% (8/18)
+## 📊 PROGRESO: 50% (9/18)
 
-### ✅ COMPLETADAS (8)
+### ✅ COMPLETADAS (9)
 
 - [x] **3.1** Servicio de gestión de proyectos (ProjectService)
 - [x] **3.2** Crear proyectos con plantillas
@@ -221,15 +230,19 @@
 - [x] **3.6** Eliminar proyectos
 - [x] **3.7** Plantillas básicas (React, Node.js, Python, HTML)
 - [x] **3.8** Panel de proyectos en UI
+- [x] **3.10** Gestor de dependencias integrado (ver SPRINT 2)
 
-### ⏳ PENDIENTES PRIORIDAD ALTA (5)
+### ⏳ PENDIENTES PRIORIDAD ALTA (4)
 
 - [ ] **3.9** Sistema de detección automática de tipo de proyecto
   - **Prioridad**: Alta
   - **Estimación**: 16 horas
   - **Funcionalidad**: Detectar por package.json, requirements.txt, etc.
 
-- [ ] **3.10** Gestor de dependencias integrado
+- [x] **3.10** ✨ **Gestor de dependencias integrado** - SPRINT 2
+  - **COMPLETADO**: Instalación de dependencias desde API
+  - **Archivo**: `backend/src/services/TerminalService.ts`
+  - **Características**: Auto-detección npm/yarn/pnpm/pip, instalación completa
   - **Prioridad**: Alta
   - **Estimación**: 24 horas
   - **Funcionalidad**: npm install, pip install, etc. desde UI
@@ -364,38 +377,38 @@
 # CATEGORÍA 5: TERMINAL INTEGRADO
 
 ## 🎯 PRIORIDAD: 1 (CRÍTICA)
-## 📊 PROGRESO: 0% (0/12)
+## 📊 PROGRESO: 50% (6/12)
 
-### ⏳ PENDIENTES PRIORIDAD CRÍTICA (6)
+### ✅ COMPLETADAS (6) - SPRINT 2
 
-- [ ] **5.1** Integración de xterm.js
-  - **Prioridad**: Crítica
-  - **Estimación**: 16 horas
+- [x] **5.1** ✨ **Integración de xterm.js** - SPRINT 2
+  - **COMPLETADO**: Terminal completo con xterm.js
+  - **Archivos**: `frontend/components/terminal.tsx`, `terminal-panel.tsx`
+  - **Características**: FitAddon, WebLinksAddon, tema personalizado
 
-- [ ] **5.2** Ejecución de comandos de sistema
-  - **Prioridad**: Crítica
-  - **Estimación**: 20 horas
-  - **Dependencias**: 5.1
+- [x] **5.2** ✨ **Ejecución de comandos de sistema** - SPRINT 2
+  - **COMPLETADO**: Ejecución vía node-pty
+  - **Archivo**: `backend/src/services/TerminalService.ts`
+  - **Características**: Ejecución async, streaming de output
 
-- [ ] **5.3** Soporte para Bash/PowerShell/CMD según OS
-  - **Prioridad**: Crítica
-  - **Estimación**: 16 horas
-  - **Dependencias**: 5.2
+- [x] **5.3** ✨ **Soporte para Bash/PowerShell/CMD según OS** - SPRINT 2
+  - **COMPLETADO**: Auto-detección de shell por plataforma
+  - **Características**: Windows (PowerShell/CMD), Unix (bash)
 
-- [ ] **5.4** Terminal con output en tiempo real
-  - **Prioridad**: Crítica
-  - **Estimación**: 12 horas
-  - **Dependencias**: 5.2
+- [x] **5.4** ✨ **Terminal con output en tiempo real** - SPRINT 2
+  - **COMPLETADO**: Streaming mediante callbacks
+  - **Características**: Output línea por línea, sin buffering
 
-- [ ] **5.5** Múltiples terminales en pestañas
-  - **Prioridad**: Alta
-  - **Estimación**: 8 horas
-  - **Dependencias**: 5.1
+- [x] **5.5** ✨ **Múltiples terminales en pestañas** - SPRINT 2
+  - **COMPLETADO**: Sistema de pestañas implementado
+  - **Archivo**: `frontend/components/terminal-panel.tsx`
+  - **Características**: Crear, cerrar, cambiar entre terminales
 
-- [ ] **5.6** Historial de comandos
-  - **Prioridad**: Alta
-  - **Estimación**: 6 horas
-  - **Dependencias**: 5.2
+- [x] **5.6** ✨ **Historial de comandos** - SPRINT 2
+  - **COMPLETADO**: Historial integrado en xterm.js
+  - **Características**: Flechas arriba/abajo para navegación
+
+### ⏳ PENDIENTES PRIORIDAD CRÍTICA (0)
 
 ### ⏳ PENDIENTES PRIORIDAD MEDIA (6)
 
@@ -628,9 +641,9 @@
 # CATEGORÍA 9: UI/UX
 
 ## 🎯 PRIORIDAD: 1 (CRÍTICA)
-## 📊 PROGRESO: 65% (13/20)
+## 📊 PROGRESO: 70% (14/20)
 
-### ✅ COMPLETADAS (13)
+### ✅ COMPLETADAS (14)
 
 - [x] **9.1** Layout responsive con paneles
 - [x] **9.2** Toolbar superior con controles
@@ -642,6 +655,10 @@
 - [x] **9.8** Glassmorphism effects
 - [x] **9.9** Animaciones suaves con CSS
 - [x] **9.10** Paleta de colores OKLCH
+- [x] **9.11** ✨ **Sistema de temas (claro/oscuro/sistema)** - SPRINT 2
+  - **COMPLETADO**: Theme switcher completo
+  - **Archivo**: `frontend/components/theme-switcher.tsx`
+  - **Características**: Light/Dark/System, persistencia en localStorage, dropdown en toolbar
 - [x] **9.13** ✨ **Command Palette (Ctrl+Shift+P)** - SPRINT 1
   - **Implementado**: Paleta completa de comandos
   - **Archivo**: `frontend/components/command-palette.tsx`
@@ -655,11 +672,6 @@
 
 ### ⏳ PENDIENTES PRIORIDAD ALTA (2)
 
-- [ ] **9.11** Sistema de temas (claro/oscuro/personalizado)
-  - **Prioridad**: Media
-  - **Estimación**: 8 horas
-  - **Estado**: Dark mode implementado, falta light mode
-
 - [ ] **9.12** Personalización de layout (drag & drop panels)
   - **Prioridad**: Media
   - **Estimación**: 16 horas
@@ -668,10 +680,6 @@
 - [ ] **9.15** Breadcrumbs de navegación
   - **Prioridad**: Media
   - **Estimación**: 6 horas
-
-- [ ] **9.16** Tooltips informativos contextuales
-  - **Prioridad**: Media
-  - **Estimación**: 8 horas
 
 ### ⏳ PENDIENTES PRIORIDAD MEDIA-BAJA (4)
 
