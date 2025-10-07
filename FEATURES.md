@@ -226,3 +226,4 @@ GET  /api/projects/templates/list - Listar plantillas
 - ✅ Rendimiento optimizado
 
 
+

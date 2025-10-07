@@ -51,6 +51,8 @@ export function SimpleCodeEditor({ value, language, onChange }: SimpleCodeEditor
       autoComplete="off"
       autoCorrect="off"
       autoCapitalize="off"
+      aria-label="Code editor"
+      placeholder="Start coding..."
     />
   )
 }

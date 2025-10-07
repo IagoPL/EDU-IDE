@@ -148,6 +148,8 @@ function TerminalPanel() {
           onKeyDown={(e) => e.key === "Enter" && handleCommand()}
           className="flex-1 bg-transparent outline-none"
           autoFocus
+          aria-label="Terminal command input"
+          placeholder="Enter command..."
         />
       </div>
     </div>
