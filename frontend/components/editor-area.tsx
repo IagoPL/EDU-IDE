@@ -171,9 +171,11 @@ export function EditorArea({ activeFile }: EditorAreaProps) {
       const matches = file.content.match(regex)
       
       // TODO: Integrar con Monaco Editor para resaltar coincidencias
-      console.log(`Encontradas ${matches?.length || 0} coincidencias para "${query}"`)
+      // Por ahora, las coincidencias se manejan en el editor
+      return matches?.length || 0
     } catch (error) {
-      console.error("Error en la búsqueda:", error)
+      // Error en la expresión regular
+      return 0
     }
   }
 

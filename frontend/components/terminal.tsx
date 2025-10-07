@@ -5,6 +5,21 @@ import "@xterm/xterm/css/xterm.css"
 import { X } from "lucide-react"
 import { Button } from "./ui/button"
 
+// Tipos para xterm.js (cargado dinámicamente)
+type XTermTerminal = {
+  write: (data: string) => void
+  writeln: (data: string) => void
+  clear: () => void
+  onData: (callback: (data: string) => void) => void
+  open: (element: HTMLElement) => void
+  dispose: () => void
+  loadAddon: (addon: unknown) => void
+}
+
+type FitAddon = {
+  fit: () => void
+}
+
 interface TerminalProps {
   onCommand?: (command: string) => void
   onClose?: () => void
@@ -13,8 +28,8 @@ interface TerminalProps {
 
 export function Terminal({ onCommand, onClose, title = "Terminal" }: TerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null)
-  const xtermRef = useRef<any | null>(null)
-  const fitAddonRef = useRef<any | null>(null)
+  const xtermRef = useRef<XTermTerminal | null>(null)
+  const fitAddonRef = useRef<FitAddon | null>(null)
   const [currentLine, setCurrentLine] = useState("")
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
@@ -200,30 +215,8 @@ export function Terminal({ onCommand, onClose, title = "Terminal" }: TerminalPro
     }
   }, [historyIndex])
 
-  const writePrompt = (term: any) => {
+  const writePrompt = (term: XTermTerminal) => {
     term.write("\r\n\x1b[32m$\x1b[0m ")
-  }
-
-  // Método público para escribir en el terminal
-  const write = (text: string) => {
-    if (xtermRef.current) {
-      xtermRef.current.write(text)
-    }
-  }
-
-  // Método público para escribir una línea
-  const writeln = (text: string) => {
-    if (xtermRef.current) {
-      xtermRef.current.writeln(text)
-    }
-  }
-
-  // Método público para limpiar
-  const clear = () => {
-    if (xtermRef.current) {
-      xtermRef.current.clear()
-      writePrompt(xtermRef.current)
-    }
   }
 
   return (
@@ -244,8 +237,7 @@ export function Terminal({ onCommand, onClose, title = "Terminal" }: TerminalPro
       {/* Terminal Container */}
       <div 
         ref={terminalRef} 
-        className="flex-1 p-2 overflow-hidden"
-        style={{ minHeight: 0 }}
+        className="flex-1 p-2 overflow-hidden min-h-0"
       />
     </div>
   )

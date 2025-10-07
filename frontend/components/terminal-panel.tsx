@@ -26,14 +26,13 @@ export function TerminalPanel({ onClose }: TerminalPanelProps) {
     try {
       const response = await api.executeCommand(command, terminalId)
       
-      if (response.success && response.data) {
-        // El output se muestra directamente en el terminal
-        console.log("Command executed:", response.data)
-      } else {
-        console.error("Command failed:", response.error)
+      if (!response.success) {
+        // Manejar error silenciosamente o mostrar en UI
+        // El terminal mostrará el error en su output
       }
     } catch (error) {
-      console.error("Error executing command:", error)
+      // Error de red o servidor
+      // El terminal debe mostrar el error en su output
     }
   }
 

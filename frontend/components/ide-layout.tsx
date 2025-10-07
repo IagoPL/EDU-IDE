@@ -11,6 +11,13 @@ import { QuickOpen } from "./quick-open"
 import { TerminalPanel } from "./terminal-panel"
 import { api } from "@/lib/api"
 
+// Tipos para el árbol de archivos
+interface FileTreeNode {
+  name: string
+  type: "file" | "directory"
+  children?: FileTreeNode[]
+}
+
 export function IDELayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [rightPanelOpen, setRightPanelOpen] = useState(true)
@@ -33,7 +40,7 @@ export function IDELayout() {
     }
   }
 
-  const extractFilePaths = (nodes: any[], basePath: string = ""): string[] => {
+  const extractFilePaths = (nodes: FileTreeNode[], basePath: string = ""): string[] => {
     let paths: string[] = []
     
     for (const node of nodes) {
@@ -62,7 +69,6 @@ export function IDELayout() {
   }
 
   const handleCommand = (command: string) => {
-    console.log("Comando ejecutado:", command)
     // Implementar acciones de comandos
     switch (command) {
       case "file.new":

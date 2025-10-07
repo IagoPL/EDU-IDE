@@ -197,7 +197,16 @@ function ExplorerContent({
   )
 }
 
-function FileTreeItem({ item, level, expandedFolders, toggleFolder, activeFile, onFileSelect }: any) {
+interface FileTreeItemProps {
+  item: FileNode
+  level: number
+  expandedFolders: Set<string>
+  toggleFolder: (path: string) => void
+  activeFile: string | null
+  onFileSelect: (path: string) => void
+}
+
+function FileTreeItem({ item, level, expandedFolders, toggleFolder, activeFile, onFileSelect }: FileTreeItemProps) {
   const isExpanded = expandedFolders.has(item.path)
   const isActive = activeFile === item.path
 
@@ -221,7 +230,7 @@ function FileTreeItem({ item, level, expandedFolders, toggleFolder, activeFile, 
         </Button>
         {isExpanded && item.children && (
           <div>
-            {item.children.map((child: any) => (
+            {item.children.map((child: FileNode) => (
               <FileTreeItem
                 key={child.path}
                 item={child}

@@ -64,8 +64,8 @@ export function ProjectsPanel() {
     }
   }
 
-  const getProjectIcon = (type: string) => {
-    const icons: Record<string, any> = {
+  const getProjectIcon = (type: string): JSX.Element => {
+    const icons: Record<string, JSX.Element> = {
       react: <Code2 className="h-6 w-6 text-blue-500" />,
       nodejs: <Code2 className="h-6 w-6 text-green-500" />,
       python: <Code2 className="h-6 w-6 text-yellow-500" />,
