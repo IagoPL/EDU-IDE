@@ -186,7 +186,7 @@ export function MonacoEditor({ value, language, onChange, theme = "vs-dark" }: M
       links: true,
       colorDecorators: true,
       lightbulb: {
-        enabled: "on",
+        enabled: true,
       },
     })
 

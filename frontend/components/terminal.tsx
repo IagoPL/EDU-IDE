@@ -13,7 +13,7 @@ type XTermTerminal = {
   onData: (callback: (data: string) => void) => void
   open: (element: HTMLElement) => void
   dispose: () => void
-  loadAddon: (addon: unknown) => void
+  loadAddon: (addon: any) => void
 }
 
 type FitAddon = {
