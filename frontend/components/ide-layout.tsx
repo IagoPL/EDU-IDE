@@ -1,0 +1,128 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Sidebar } from "./sidebar"
+import { EditorArea } from "./editor-area"
+import { RightPanel } from "./right-panel"
+import { Toolbar } from "./toolbar"
+import { StatusBar } from "./status-bar"
+import { CommandPalette } from "./command-palette"
+import { QuickOpen } from "./quick-open"
+import { api } from "@/lib/api"
+
+export function IDELayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [rightPanelOpen, setRightPanelOpen] = useState(true)
+  const [activeFile, setActiveFile] = useState<string | null>(null)
+  const [allFiles, setAllFiles] = useState<string[]>([])
+  const [recentFiles, setRecentFiles] = useState<string[]>([])
+
+  // Cargar lista de todos los archivos para Quick Open
+  useEffect(() => {
+    loadAllFiles()
+  }, [])
+
+  const loadAllFiles = async () => {
+    const response = await api.getFileTree()
+    if (response.success && response.data) {
+      // Extraer todos los paths de archivos del árbol
+      const files = extractFilePaths(response.data)
+      setAllFiles(files)
+    }
+  }
+
+  const extractFilePaths = (nodes: any[], basePath: string = ""): string[] => {
+    let paths: string[] = []
+    
+    for (const node of nodes) {
+      const fullPath = basePath ? `${basePath}/${node.name}` : node.name
+      
+      if (node.type === "file") {
+        paths.push(fullPath)
+      }
+      
+      if (node.children && node.children.length > 0) {
+        paths = paths.concat(extractFilePaths(node.children, fullPath))
+      }
+    }
+    
+    return paths
+  }
+
+  const handleFileOpen = (path: string) => {
+    setActiveFile(path)
+    
+    // Agregar a archivos recientes
+    setRecentFiles(prev => {
+      const filtered = prev.filter(f => f !== path)
+      return [path, ...filtered].slice(0, 10) // Mantener solo los últimos 10
+    })
+  }
+
+  const handleCommand = (command: string) => {
+    console.log("Comando ejecutado:", command)
+    // Implementar acciones de comandos
+    switch (command) {
+      case "file.new":
+        // TODO: Implementar crear archivo
+        break
+      case "file.save":
+        // TODO: Implementar guardar
+        break
+      case "view.terminal":
+        // TODO: Mostrar terminal
+        break
+      // ... más comandos
+    }
+  }
+
+  return (
+    <div className="flex h-screen w-full flex-col bg-background overflow-hidden">
+      {/* Command Palette - Ctrl+Shift+P */}
+      <CommandPalette
+        onFileOpen={handleFileOpen}
+        onCommand={handleCommand}
+        recentFiles={recentFiles}
+      />
+
+      {/* Quick Open - Ctrl+P */}
+      <QuickOpen
+        files={allFiles}
+        onFileSelect={handleFileOpen}
+        recentFiles={recentFiles}
+      />
+
+      {/* Toolbar */}
+      <Toolbar
+        sidebarOpen={sidebarOpen}
+        rightPanelOpen={rightPanelOpen}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
+      />
+
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Left Sidebar */}
+        {sidebarOpen && (
+          <div className="w-64 flex-shrink-0 border-r border-border">
+            <Sidebar activeFile={activeFile} onFileSelect={handleFileOpen} />
+          </div>
+        )}
+
+        {/* Editor Area - takes remaining space */}
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <EditorArea activeFile={activeFile} />
+        </div>
+
+        {/* Right Panel */}
+        {rightPanelOpen && (
+          <div className="w-80 flex-shrink-0 border-l border-border">
+            <RightPanel />
+          </div>
+        )}
+      </div>
+
+      {/* Status Bar */}
+      <StatusBar activeFile={activeFile} />
+    </div>
+  )
+}
