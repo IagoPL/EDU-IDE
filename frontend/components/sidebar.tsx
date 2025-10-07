@@ -1,11 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshCw, Plus, FolderPlus } from "lucide-react"
+import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshCw, Plus, FolderPlus, File, Folder, Edit3, Trash2 } from "lucide-react"
 import { Button } from "./ui/button"
 import { cn } from "@/lib/utils"
 import { api, FileNode } from "@/lib/api"
 import { GitPanel } from "./git-panel"
+import { FileDialog } from "./file-dialog"
+import { DeleteDialog } from "./delete-dialog"
+import { FileContextMenu } from "./file-context-menu"
+import { Input } from "./ui/input"
+import { useToast } from "@/hooks/use-toast"
 
 interface SidebarProps {
   activeFile: string | null
@@ -67,6 +72,13 @@ function ExplorerContent({
   const [fileTree, setFileTree] = useState<FileNode[]>([])
   const [loading, setLoading] = useState(true)
   const [workspace, setWorkspace] = useState<string>('')
+  const [fileDialogOpen, setFileDialogOpen] = useState(false)
+  const [fileDialogType, setFileDialogType] = useState<"file" | "folder">("file")
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<{ name: string; path: string; type: "file" | "folder" } | null>(null)
+  const [renamingItem, setRenamingItem] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState("")
+  const { toast } = useToast()
 
   // Cargar el árbol de archivos
   const loadFileTree = async () => {
@@ -117,23 +129,116 @@ function ExplorerContent({
     setExpandedFolders(newExpanded)
   }
 
-  const createNewFile = async () => {
-    const fileName = prompt('Nombre del archivo:')
-    if (fileName) {
-      const response = await api.createFile(fileName, '// Nuevo archivo\n')
-      if (response.success) {
-        loadFileTree()
+  const createNewFile = () => {
+    setFileDialogType("file")
+    setFileDialogOpen(true)
+  }
+
+  const createNewFolder = () => {
+    setFileDialogType("folder")
+    setFileDialogOpen(true)
+  }
+
+  const handleFileDialogConfirm = async (name: string) => {
+    try {
+      if (fileDialogType === "file") {
+        const response = await api.createFile(name, '')
+        if (response.success) {
+          await loadFileTree()
+          toast({
+            title: "Archivo creado",
+            description: `${name} se ha creado correctamente`,
+          })
+        }
+      } else {
+        const response = await api.createDirectory(name)
+        if (response.success) {
+          await loadFileTree()
+          toast({
+            title: "Carpeta creada",
+            description: `${name} se ha creado correctamente`,
+          })
+        }
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "No se pudo crear el elemento",
+        variant: "destructive",
+      })
+      throw error
     }
   }
 
-  const createNewFolder = async () => {
-    const folderName = prompt('Nombre de la carpeta:')
-    if (folderName) {
-      const response = await api.createDirectory(folderName)
-      if (response.success) {
-        loadFileTree()
+  const handleDeleteItem = (item: FileNode) => {
+    setItemToDelete({
+      name: item.name,
+      path: item.path,
+      type: item.type === "directory" ? "folder" : "file",
+    })
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return
+
+    try {
+      if (itemToDelete.type === "folder") {
+        const response = await api.deleteDirectory(itemToDelete.path)
+        if (response.success) {
+          await loadFileTree()
+          toast({
+            title: "Carpeta eliminada",
+            description: `${itemToDelete.name} se ha eliminado correctamente`,
+          })
+        }
+      } else {
+        const response = await api.deleteFile(itemToDelete.path)
+        if (response.success) {
+          await loadFileTree()
+          toast({
+            title: "Archivo eliminado",
+            description: `${itemToDelete.name} se ha eliminado correctamente`,
+          })
+        }
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el elemento",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleRenameItem = (item: FileNode) => {
+    setRenamingItem(item.path)
+    setRenameValue(item.name)
+  }
+
+  const confirmRename = async (oldPath: string) => {
+    if (!renameValue.trim() || renameValue === oldPath.split('/').pop()) {
+      setRenamingItem(null)
+      return
+    }
+
+    try {
+      const newPath = oldPath.replace(/[^/]+$/, renameValue)
+      const response = await api.renameFile(oldPath, newPath)
+      if (response.success) {
+        await loadFileTree()
+        setRenamingItem(null)
+        toast({
+          title: "Renombrado",
+          description: `Renombrado correctamente a ${renameValue}`,
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo renombrar el elemento",
+        variant: "destructive",
+      })
     }
   }
 
@@ -191,8 +296,31 @@ function ExplorerContent({
             toggleFolder={toggleFolder}
             activeFile={activeFile}
             onFileSelect={onFileSelect}
+            onDelete={handleDeleteItem}
+            onRename={handleRenameItem}
+            renamingItem={renamingItem}
+            renameValue={renameValue}
+            setRenameValue={setRenameValue}
+            confirmRename={confirmRename}
           />
         ))
+      )}
+
+      <FileDialog
+        open={fileDialogOpen}
+        onOpenChange={setFileDialogOpen}
+        type={fileDialogType}
+        onConfirm={handleFileDialogConfirm}
+      />
+
+      {itemToDelete && (
+        <DeleteDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          itemName={itemToDelete.name}
+          itemType={itemToDelete.type}
+          onConfirm={confirmDelete}
+        />
       )}
     </div>
   )
@@ -205,30 +333,96 @@ interface FileTreeItemProps {
   toggleFolder: (path: string) => void
   activeFile: string | null
   onFileSelect: (path: string) => void
+  onDelete: (item: FileNode) => void
+  onRename: (item: FileNode) => void
+  renamingItem: string | null
+  renameValue: string
+  setRenameValue: (value: string) => void
+  confirmRename: (path: string) => void
 }
 
-function FileTreeItem({ item, level, expandedFolders, toggleFolder, activeFile, onFileSelect }: FileTreeItemProps) {
+function FileTreeItem({ 
+  item, 
+  level, 
+  expandedFolders, 
+  toggleFolder, 
+  activeFile, 
+  onFileSelect,
+  onDelete,
+  onRename,
+  renamingItem,
+  renameValue,
+  setRenameValue,
+  confirmRename
+}: FileTreeItemProps) {
   const isExpanded = expandedFolders.has(item.path)
   const isActive = activeFile === item.path
+  const isRenaming = renamingItem === item.path
 
   if (item.type === "directory") {
     return (
       <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "w-full justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-secondary",
-            isActive && "border-l-2 border-primary bg-secondary",
-          )}
-          style={{ paddingLeft: `${level * 12 + 8}px` }}
-          onClick={() => toggleFolder(item.path)}
+        <FileContextMenu
+          isFolder={true}
+          onRename={() => onRename(item)}
+          onDelete={() => onDelete(item)}
+          onNewFile={() => {}}
+          onNewFolder={() => {}}
         >
-          <FolderOpen
-            className={cn("mr-2 h-4 w-4 text-blue-500 transition-transform", !isExpanded && "rotate-[-90deg]")}
-          />
-          {item.name}
-        </Button>
+          {isRenaming ? (
+            <div style={{ paddingLeft: `${level * 12 + 8}px` }} className="px-2 py-1">
+              <Input
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") confirmRename(item.path)
+                  if (e.key === "Escape") setRenameValue("")
+                }}
+                onBlur={() => confirmRename(item.path)}
+                className="h-7 text-sm"
+                autoFocus
+              />
+            </div>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "w-full justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-accent",
+                isActive && "border-l-2 border-primary bg-accent",
+              )}
+              style={{ paddingLeft: `${level * 12 + 8}px` }}
+              onClick={() => toggleFolder(item.path)}
+            >
+              <Folder
+                className={cn("mr-2 h-4 w-4 text-yellow-500 transition-transform", !isExpanded && "rotate-[-90deg]")}
+              />
+              <span className="truncate">{item.name}</span>
+              <div className="ml-auto flex gap-1 opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onRename(item)
+                  }}
+                  className="rounded p-0.5 hover:bg-background"
+                  title="Renombrar"
+                >
+                  <Edit3 className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(item)
+                  }}
+                  className="rounded p-0.5 hover:bg-background"
+                  title="Eliminar"
+                >
+                  <Trash2 className="h-3 w-3 text-destructive" />
+                </button>
+              </div>
+            </Button>
+          )}
+        </FileContextMenu>
         {isExpanded && item.children && (
           <div>
             {item.children.map((child: FileNode) => (
@@ -240,6 +434,12 @@ function FileTreeItem({ item, level, expandedFolders, toggleFolder, activeFile, 
                 toggleFolder={toggleFolder}
                 activeFile={activeFile}
                 onFileSelect={onFileSelect}
+                onDelete={onDelete}
+                onRename={onRename}
+                renamingItem={renamingItem}
+                renameValue={renameValue}
+                setRenameValue={setRenameValue}
+                confirmRename={confirmRename}
               />
             ))}
           </div>
@@ -249,19 +449,63 @@ function FileTreeItem({ item, level, expandedFolders, toggleFolder, activeFile, 
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className={cn(
-        "w-full justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-secondary",
-        isActive && "border-l-2 border-primary bg-secondary",
-      )}
-      style={{ paddingLeft: `${level * 12 + 24}px` }}
-      onClick={() => onFileSelect(item.path)}
+    <FileContextMenu
+      isFolder={false}
+      onRename={() => onRename(item)}
+      onDelete={() => onDelete(item)}
     >
-      <FileIcon filename={item.name} />
-      {item.name}
-    </Button>
+      {isRenaming ? (
+        <div style={{ paddingLeft: `${level * 12 + 24}px` }} className="px-2 py-1">
+          <Input
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") confirmRename(item.path)
+              if (e.key === "Escape") setRenameValue("")
+            }}
+            onBlur={() => confirmRename(item.path)}
+            className="h-7 text-sm"
+            autoFocus
+          />
+        </div>
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "group w-full justify-start rounded-md px-2 py-1 text-sm transition-colors hover:bg-accent",
+            isActive && "border-l-2 border-primary bg-accent",
+          )}
+          style={{ paddingLeft: `${level * 12 + 24}px` }}
+          onClick={() => onFileSelect(item.path)}
+        >
+          <FileIcon filename={item.name} />
+          <span className="truncate">{item.name}</span>
+          <div className="ml-auto flex gap-1 opacity-0 group-hover:opacity-100">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onRename(item)
+              }}
+              className="rounded p-0.5 hover:bg-background"
+              title="Renombrar"
+            >
+              <Edit3 className="h-3 w-3" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(item)
+              }}
+              className="rounded p-0.5 hover:bg-background"
+              title="Eliminar"
+            >
+              <Trash2 className="h-3 w-3 text-destructive" />
+            </button>
+          </div>
+        </Button>
+      )}
+    </FileContextMenu>
   )
 }
 
