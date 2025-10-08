@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshCw, Plus, FolderPlus, File, Folder, Edit3, Trash2, ChevronRight, ChevronDown, Bug, TestTube, BookOpen } from "lucide-react"
+import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshCw, Plus, FolderPlus, File, Folder, Edit3, Trash2, ChevronRight, ChevronDown, Bug, TestTube, BookOpen, Trophy } from "lucide-react"
 import { Button } from "./ui/button"
 import { cn } from "@/lib/utils"
 import { api, FileNode } from "@/lib/api"
@@ -9,6 +9,7 @@ import { GitPanel } from "./git-panel"
 import { DebugPanel } from "./debug-panel"
 import { TestingPanel } from "./testing-panel"
 import { DocumentationPanel } from "./documentation-panel"
+import { ProgressPanel } from "./progress-panel"
 import { FileDialog } from "./file-dialog"
 import { DeleteDialog } from "./delete-dialog"
 import { FileContextMenu } from "./file-context-menu"
@@ -32,7 +33,7 @@ export function Sidebar({ activeFile, onFileSelect }: SidebarProps) {
     { id: "debug" as SidebarTab, icon: Bug, label: "Depurador" },
     { id: "testing" as SidebarTab, icon: TestTube, label: "Testing" },
     { id: "docs" as SidebarTab, icon: BookOpen, label: "Documentación" },
-    { id: "settings" as SidebarTab, icon: Settings, label: "Configuración" },
+    { id: "settings" as SidebarTab, icon: Trophy, label: "Progreso" },
   ]
 
   return (
@@ -64,7 +65,7 @@ export function Sidebar({ activeFile, onFileSelect }: SidebarProps) {
         {activeTab === "debug" && <DebugPanel activeFile={activeFile} onFileSelect={onFileSelect} />}
         {activeTab === "testing" && <TestingPanel onFileSelect={onFileSelect} />}
         {activeTab === "docs" && <DocumentationPanel activeFile={activeFile} />}
-        {activeTab === "settings" && <div className="p-4 text-sm text-muted-foreground">Configuración del IDE...</div>}
+        {activeTab === "settings" && <ProgressPanel />}
       </div>
     </div>
   )

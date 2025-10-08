@@ -618,6 +618,48 @@ class ApiClient {
   async getSnippetById(id: string): Promise<ApiResponse<{ snippet: any }>> {
     return this.request(`/api/snippets/${id}`);
   }
+
+  // Progress API
+  async getUserProgress(userId: string = 'default'): Promise<ApiResponse<any>> {
+    return this.request(`/api/progress/user/${userId}`);
+  }
+
+  async getProgressStats(userId: string = 'default'): Promise<ApiResponse<any>> {
+    return this.request(`/api/progress/stats/${userId}`);
+  }
+
+  async getUnlockedAchievements(userId: string = 'default'): Promise<ApiResponse<{ achievements: any[] }>> {
+    return this.request(`/api/progress/achievements/unlocked/${userId}`);
+  }
+
+  async getPendingAchievements(userId: string = 'default'): Promise<ApiResponse<{ achievements: any[] }>> {
+    return this.request(`/api/progress/achievements/pending/${userId}`);
+  }
+
+  async getLanguageProgress(userId: string = 'default'): Promise<ApiResponse<{ languages: any[] }>> {
+    return this.request(`/api/progress/languages/${userId}`);
+  }
+
+  async trackLinesWritten(language: string, lines: number, userId: string = 'default'): Promise<ApiResponse<any>> {
+    return this.request('/api/progress/track/lines', {
+      method: 'POST',
+      body: JSON.stringify({ userId, language, lines }),
+    });
+  }
+
+  async trackFileCreated(language: string, userId: string = 'default'): Promise<ApiResponse<any>> {
+    return this.request('/api/progress/track/file', {
+      method: 'POST',
+      body: JSON.stringify({ userId, language }),
+    });
+  }
+
+  async trackEvent(type: 'commit' | 'test' | 'debug', count: number = 1, userId: string = 'default'): Promise<ApiResponse<any>> {
+    return this.request('/api/progress/track/event', {
+      method: 'POST',
+      body: JSON.stringify({ userId, type, count }),
+    });
+  }
 }
 
 export const api = new ApiClient();

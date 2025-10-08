@@ -9,6 +9,7 @@ import debugRouter from './routes/debug';
 import testingRouter from './routes/testing';
 import documentationRouter from './routes/documentation';
 import snippetsRouter from './routes/snippets';
+import progressRouter from './routes/progress';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.get('/api', (req, res) => {
       testing: '/api/testing',
       documentation: '/api/documentation',
       snippets: '/api/snippets',
+      progress: '/api/progress',
       ai: '/api/ai'
     }
   });
@@ -54,6 +56,7 @@ app.use('/api/debug', debugRouter);
 app.use('/api/testing', testingRouter);
 app.use('/api/documentation', documentationRouter);
 app.use('/api/snippets', snippetsRouter);
+app.use('/api/progress', progressRouter);
 
 // Start server
 app.listen(PORT, () => {
@@ -69,6 +72,7 @@ app.listen(PORT, () => {
   console.log(`   - Testing: http://localhost:${PORT}/api/testing`);
   console.log(`   - Documentation: http://localhost:${PORT}/api/documentation`);
   console.log(`   - Snippets: http://localhost:${PORT}/api/snippets`);
+  console.log(`   - Progress: http://localhost:${PORT}/api/progress`);
 });
 
 
