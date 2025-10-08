@@ -568,6 +568,27 @@ class ApiClient {
   async getCoverage(): Promise<ApiResponse<any>> {
     return this.request('/api/testing/coverage');
   }
+
+  // Documentation API
+  async getDocumentationByLanguage(language: string): Promise<ApiResponse<{ resources: any[] }>> {
+    return this.request(`/api/documentation/language/${language}`);
+  }
+
+  async getDocumentationByFramework(framework: string): Promise<ApiResponse<{ resources: any[] }>> {
+    return this.request(`/api/documentation/framework/${framework}`);
+  }
+
+  async getRecommendedDocs(file: string): Promise<ApiResponse<{ resources: any[] }>> {
+    return this.request(`/api/documentation/recommend?file=${encodeURIComponent(file)}`);
+  }
+
+  async getDocumentationCategories(): Promise<ApiResponse<{ categories: any[] }>> {
+    return this.request('/api/documentation/categories');
+  }
+
+  async searchDocumentation(tags: string[]): Promise<ApiResponse<{ resources: any[] }>> {
+    return this.request(`/api/documentation/search?tags=${tags.join(',')}`);
+  }
 }
 
 export const api = new ApiClient();

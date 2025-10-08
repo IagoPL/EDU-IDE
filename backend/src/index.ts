@@ -7,6 +7,7 @@ import terminalRouter from './routes/terminal';
 import gitRouter from './routes/git';
 import debugRouter from './routes/debug';
 import testingRouter from './routes/testing';
+import documentationRouter from './routes/documentation';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.get('/api', (req, res) => {
       git: '/api/git',
       debug: '/api/debug',
       testing: '/api/testing',
+      documentation: '/api/documentation',
       ai: '/api/ai'
     }
   });
@@ -48,6 +50,7 @@ app.use('/api/terminal', terminalRouter);
 app.use('/api/git', gitRouter);
 app.use('/api/debug', debugRouter);
 app.use('/api/testing', testingRouter);
+app.use('/api/documentation', documentationRouter);
 
 // Start server
 app.listen(PORT, () => {
@@ -61,6 +64,7 @@ app.listen(PORT, () => {
   console.log(`   - Git: http://localhost:${PORT}/api/git`);
   console.log(`   - Debug: http://localhost:${PORT}/api/debug`);
   console.log(`   - Testing: http://localhost:${PORT}/api/testing`);
+  console.log(`   - Documentation: http://localhost:${PORT}/api/documentation`);
 });
 
 
