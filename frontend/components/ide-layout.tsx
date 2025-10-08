@@ -96,6 +96,21 @@ export function IDELayout() {
       case "view.search":
         setRightPanelOpen(true)
         break
+      case "editor.goToDefinition":
+        // Monaco maneja esto nativamente con F12
+        break
+      case "editor.findReferences":
+        // Monaco maneja esto nativamente con Shift+F12
+        break
+      case "editor.formatDocument":
+        // Monaco maneja esto nativamente con Shift+Alt+F
+        break
+      case "editor.renameSymbol":
+        // Monaco maneja esto nativamente con F2
+        break
+      case "editor.quickFix":
+        // Monaco maneja esto nativamente con Ctrl+.
+        break
       // ... más comandos
     }
   }

@@ -83,6 +83,41 @@ export function CommandPalette({ onFileOpen, onCommand, recentFiles = [] }: Comm
       ],
     },
     {
+      group: "Editor",
+      items: [
+        {
+          icon: FileCode,
+          label: "Ir a Definición",
+          shortcut: "F12",
+          onSelect: () => handleSelect(() => onCommand?.("editor.goToDefinition")),
+        },
+        {
+          icon: Search,
+          label: "Buscar Referencias",
+          shortcut: "Shift+F12",
+          onSelect: () => handleSelect(() => onCommand?.("editor.findReferences")),
+        },
+        {
+          icon: Palette,
+          label: "Formatear Documento",
+          shortcut: "Shift+Alt+F",
+          onSelect: () => handleSelect(() => onCommand?.("editor.formatDocument")),
+        },
+        {
+          icon: FileText,
+          label: "Renombrar Símbolo",
+          shortcut: "F2",
+          onSelect: () => handleSelect(() => onCommand?.("editor.renameSymbol")),
+        },
+        {
+          icon: Zap,
+          label: "Quick Fix",
+          shortcut: "Ctrl+.",
+          onSelect: () => handleSelect(() => onCommand?.("editor.quickFix")),
+        },
+      ],
+    },
+    {
       group: "Edición",
       items: [
         {

@@ -15,6 +15,12 @@ export interface MonacoEditorHandle {
   goToLine: (line: number) => void
   getEditor: () => editor.IStandaloneCodeEditor | null
   getTotalLines: () => number
+  formatDocument: () => void
+  goToDefinition: () => void
+  findReferences: () => void
+  renameSymbol: () => void
+  showHover: () => void
+  quickFix: () => void
 }
 
 export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
@@ -33,6 +39,36 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
     getEditor: () => editorRef.current,
     getTotalLines: () => {
       return editorRef.current?.getModel()?.getLineCount() || 0
+    },
+    formatDocument: () => {
+      if (editorRef.current) {
+        editorRef.current.getAction('editor.action.formatDocument')?.run()
+      }
+    },
+    goToDefinition: () => {
+      if (editorRef.current) {
+        editorRef.current.getAction('editor.action.revealDefinition')?.run()
+      }
+    },
+    findReferences: () => {
+      if (editorRef.current) {
+        editorRef.current.getAction('editor.action.goToReferences')?.run()
+      }
+    },
+    renameSymbol: () => {
+      if (editorRef.current) {
+        editorRef.current.getAction('editor.action.rename')?.run()
+      }
+    },
+    showHover: () => {
+      if (editorRef.current) {
+        editorRef.current.getAction('editor.action.showHover')?.run()
+      }
+    },
+    quickFix: () => {
+      if (editorRef.current) {
+        editorRef.current.getAction('editor.action.quickFix')?.run()
+      }
     }
   }))
 

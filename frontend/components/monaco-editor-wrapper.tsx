@@ -31,6 +31,24 @@ export const MonacoEditorWrapper = forwardRef<MonacoEditorHandle, MonacoEditorPr
     },
     getTotalLines: () => {
       return editorRef.current?.getTotalLines() || 0
+    },
+    formatDocument: () => {
+      editorRef.current?.formatDocument()
+    },
+    goToDefinition: () => {
+      editorRef.current?.goToDefinition()
+    },
+    findReferences: () => {
+      editorRef.current?.findReferences()
+    },
+    renameSymbol: () => {
+      editorRef.current?.renameSymbol()
+    },
+    showHover: () => {
+      editorRef.current?.showHover()
+    },
+    quickFix: () => {
+      editorRef.current?.quickFix()
     }
   }))
 
