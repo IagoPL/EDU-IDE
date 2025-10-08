@@ -14,20 +14,20 @@
 | **Gestión de Proyectos** | 9 | 0 | 9 | 18 |
 | **Asistente IA** | 0 | 0 | 18 | 18 |
 | **Terminal Integrado** | 6 | 0 | 6 | 12 |
-| **Git Integration** | 8 | 0 | 7 | 15 |
+| **Git Integration** | 13 | 0 | 2 | 15 |
 | **Debugging** | 8 | 0 | 4 | 12 |
-| **Testing** | 0 | 0 | 10 | 10 |
+| **Testing** | 10 | 0 | 0 | 10 |
 | **UI/UX** | 14 | 0 | 6 | 20 |
-| **Funcionalidades Educativas** | 0 | 0 | 15 | 15 |
+| **Funcionalidades Educativas** | 4 | 0 | 11 | 15 |
 | **Colaboración** | 0 | 0 | 12 | 12 |
 | **Cloud & Deploy** | 0 | 0 | 10 | 10 |
 | **Plugins & Extensiones** | 0 | 0 | 8 | 8 |
 | **Accesibilidad** | 2 | 0 | 8 | 10 |
 | **Rendimiento** | 5 | 0 | 5 | 10 |
 | **Seguridad** | 1 | 0 | 9 | 10 |
-| **TOTAL** | **85** | **0** | **125** | **210** |
+| **TOTAL** | **115** | **0** | **95** | **210** |
 
-**Progreso global**: 40.5% completado
+**Progreso global**: 54.8% completado
 
 ### 🎉 Sprint 1 Completado (7 Oct 2025)
 - ✅ Sistema de caché de archivos

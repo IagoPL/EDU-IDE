@@ -10,6 +10,7 @@ import testingRouter from './routes/testing';
 import documentationRouter from './routes/documentation';
 import snippetsRouter from './routes/snippets';
 import progressRouter from './routes/progress';
+import shellsRouter from './routes/shells';
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.get('/api', (req, res) => {
       documentation: '/api/documentation',
       snippets: '/api/snippets',
       progress: '/api/progress',
+      shells: '/api/shells',
       ai: '/api/ai'
     }
   });
@@ -57,6 +59,7 @@ app.use('/api/testing', testingRouter);
 app.use('/api/documentation', documentationRouter);
 app.use('/api/snippets', snippetsRouter);
 app.use('/api/progress', progressRouter);
+app.use('/api/shells', shellsRouter);
 
 // Start server
 app.listen(PORT, () => {
@@ -73,6 +76,7 @@ app.listen(PORT, () => {
   console.log(`   - Documentation: http://localhost:${PORT}/api/documentation`);
   console.log(`   - Snippets: http://localhost:${PORT}/api/snippets`);
   console.log(`   - Progress: http://localhost:${PORT}/api/progress`);
+  console.log(`   - Shells: http://localhost:${PORT}/api/shells`);
 });
 
 

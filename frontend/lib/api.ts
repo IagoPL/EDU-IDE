@@ -735,6 +735,27 @@ class ApiClient {
       body: JSON.stringify({ userId, type, count }),
     });
   }
+
+  // Shells API
+  async getAvailableShells(): Promise<ApiResponse<{ shells: any[] }>> {
+    return this.request('/api/shells/available');
+  }
+
+  async getDefaultShell(): Promise<ApiResponse<{ shell: any }>> {
+    return this.request('/api/shells/default');
+  }
+
+  async getShellById(id: string): Promise<ApiResponse<{ shell: any }>> {
+    return this.request(`/api/shells/${id}`);
+  }
+
+  async getShellCommands(shellId: string): Promise<ApiResponse<{ commands: string[] }>> {
+    return this.request(`/api/shells/${shellId}/commands`);
+  }
+
+  async getShellSnippets(shellId: string): Promise<ApiResponse<{ snippets: any }>> {
+    return this.request(`/api/shells/${shellId}/snippets`);
+  }
 }
 
 export const api = new ApiClient();

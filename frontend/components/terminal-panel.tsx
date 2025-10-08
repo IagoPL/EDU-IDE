@@ -1,15 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Terminal } from "./terminal"
 import { Button } from "./ui/button"
-import { Plus, X } from "lucide-react"
+import { Plus, X, ChevronDown, Zap, Terminal as TerminalIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
 import { api } from "@/lib/api"
+
+interface ShellInfo {
+  id: string
+  name: string
+  command: string
+  args: string[]
+  available: boolean
+  version?: string
+  icon: string
+  description: string
+  category: 'system' | 'bash' | 'wsl' | 'custom'
+}
 
 interface TerminalTab {
   id: string
   title: string
+  shellId?: string
+  shellName?: string
 }
 
 interface TerminalPanelProps {
@@ -21,6 +43,29 @@ export function TerminalPanel({ onClose }: TerminalPanelProps) {
     { id: "terminal-1", title: "Terminal 1" }
   ])
   const [activeTerminal, setActiveTerminal] = useState("terminal-1")
+  const [availableShells, setAvailableShells] = useState<ShellInfo[]>([])
+  const [defaultShell, setDefaultShell] = useState<ShellInfo | null>(null)
+
+  useEffect(() => {
+    loadAvailableShells()
+  }, [])
+
+  const loadAvailableShells = async () => {
+    try {
+      const response = await api.getAvailableShells()
+      if (response.success && response.data) {
+        setAvailableShells(response.data.shells)
+        
+        // Cargar shell por defecto
+        const defaultResponse = await api.getDefaultShell()
+        if (defaultResponse.success && defaultResponse.data) {
+          setDefaultShell(defaultResponse.data.shell)
+        }
+      }
+    } catch (error) {
+      console.error("Error loading shells:", error)
+    }
+  }
 
   const handleCommand = async (terminalId: string, command: string) => {
     try {
@@ -36,11 +81,14 @@ export function TerminalPanel({ onClose }: TerminalPanelProps) {
     }
   }
 
-  const addTerminal = () => {
+  const addTerminal = (shellInfo?: ShellInfo) => {
     const newId = `terminal-${terminals.length + 1}`
+    const shell = shellInfo || defaultShell
     const newTerminal: TerminalTab = {
       id: newId,
-      title: `Terminal ${terminals.length + 1}`
+      title: shell ? `${shell.icon} ${shell.name} ${terminals.length + 1}` : `Terminal ${terminals.length + 1}`,
+      shellId: shell?.id,
+      shellName: shell?.name
     }
     
     setTerminals([...terminals, newTerminal])
@@ -69,15 +117,53 @@ export function TerminalPanel({ onClose }: TerminalPanelProps) {
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">Terminal</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={addTerminal}
-            className="h-6 w-6 p-0"
-            title="Nueva Terminal"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+          
+          {/* Dropdown para seleccionar tipo de shell */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 gap-1 px-2 text-xs"
+              >
+                <Plus className="h-3 w-3" />
+                Nueva
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel className="text-xs">Tipo de Terminal</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              {availableShells.length === 0 ? (
+                <DropdownMenuItem onClick={() => addTerminal()}>
+                  <TerminalIcon className="mr-2 h-4 w-4" />
+                  Terminal por Defecto
+                </DropdownMenuItem>
+              ) : (
+                availableShells.map((shell) => (
+                  <DropdownMenuItem 
+                    key={shell.id} 
+                    onClick={() => addTerminal(shell)}
+                  >
+                    <span className="mr-2">{shell.icon}</span>
+                    <div className="flex-1">
+                      <div className="font-medium">{shell.name}</div>
+                      {shell.version && (
+                        <div className="text-xs text-muted-foreground">{shell.version}</div>
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))
+              )}
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={loadAvailableShells}>
+                <Zap className="mr-2 h-4 w-4" />
+                Redetectar Shells
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <Button
           variant="ghost"
