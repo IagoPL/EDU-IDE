@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshCw, Plus, FolderPlus, File, Folder, Edit3, Trash2, ChevronRight, ChevronDown, Bug } from "lucide-react"
+import { FileType as FileTree, FolderOpen, Search, GitBranch, Settings, RefreshCw, Plus, FolderPlus, File, Folder, Edit3, Trash2, ChevronRight, ChevronDown, Bug, TestTube } from "lucide-react"
 import { Button } from "./ui/button"
 import { cn } from "@/lib/utils"
 import { api, FileNode } from "@/lib/api"
 import { GitPanel } from "./git-panel"
 import { DebugPanel } from "./debug-panel"
+import { TestingPanel } from "./testing-panel"
 import { FileDialog } from "./file-dialog"
 import { DeleteDialog } from "./delete-dialog"
 import { FileContextMenu } from "./file-context-menu"
@@ -18,7 +19,7 @@ interface SidebarProps {
   onFileSelect: (file: string) => void
 }
 
-type SidebarTab = "explorer" | "search" | "git" | "debug" | "settings"
+type SidebarTab = "explorer" | "search" | "git" | "debug" | "testing" | "settings"
 
 export function Sidebar({ activeFile, onFileSelect }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>("explorer")
@@ -28,6 +29,7 @@ export function Sidebar({ activeFile, onFileSelect }: SidebarProps) {
     { id: "search" as SidebarTab, icon: Search, label: "Buscar" },
     { id: "git" as SidebarTab, icon: GitBranch, label: "Git" },
     { id: "debug" as SidebarTab, icon: Bug, label: "Depurador" },
+    { id: "testing" as SidebarTab, icon: TestTube, label: "Testing" },
     { id: "settings" as SidebarTab, icon: Settings, label: "Configuración" },
   ]
 
@@ -58,6 +60,7 @@ export function Sidebar({ activeFile, onFileSelect }: SidebarProps) {
         {activeTab === "search" && <div className="p-4 text-sm text-muted-foreground">Búsqueda en archivos...</div>}
         {activeTab === "git" && <GitPanel />}
         {activeTab === "debug" && <DebugPanel activeFile={activeFile} onFileSelect={onFileSelect} />}
+        {activeTab === "testing" && <TestingPanel onFileSelect={onFileSelect} />}
         {activeTab === "settings" && <div className="p-4 text-sm text-muted-foreground">Configuración del IDE...</div>}
       </div>
     </div>

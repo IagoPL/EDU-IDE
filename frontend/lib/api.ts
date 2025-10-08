@@ -540,6 +540,34 @@ class ApiClient {
   async getDebugSessions(): Promise<ApiResponse<any[]>> {
     return this.request('/api/debug/sessions');
   }
+
+  // Testing API
+  async detectTestFramework(): Promise<ApiResponse<{ framework: 'jest' | 'mocha' | 'pytest' | null }>> {
+    return this.request('/api/testing/detect-framework');
+  }
+
+  async discoverTests(framework?: 'jest' | 'mocha' | 'pytest'): Promise<ApiResponse<{ testFiles: string[] }>> {
+    const params = framework ? `?framework=${framework}` : '';
+    return this.request(`/api/testing/discover${params}`);
+  }
+
+  async runAllTests(framework: 'jest' | 'mocha' | 'pytest', coverage: boolean = false): Promise<ApiResponse<any>> {
+    return this.request('/api/testing/run', {
+      method: 'POST',
+      body: JSON.stringify({ framework, coverage }),
+    });
+  }
+
+  async runTestFile(file: string, framework: 'jest' | 'mocha' | 'pytest'): Promise<ApiResponse<any>> {
+    return this.request('/api/testing/run-file', {
+      method: 'POST',
+      body: JSON.stringify({ file, framework }),
+    });
+  }
+
+  async getCoverage(): Promise<ApiResponse<any>> {
+    return this.request('/api/testing/coverage');
+  }
 }
 
 export const api = new ApiClient();
