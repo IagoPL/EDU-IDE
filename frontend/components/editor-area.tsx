@@ -7,6 +7,7 @@ import { X, Play, Save, Download, FileText, Search } from "lucide-react"
 import { MonacoEditorWrapper as MonacoEditor } from "./monaco-editor-wrapper"
 import { FindReplace, type FindOptions } from "./find-replace"
 import { GoToLine } from "./go-to-line"
+import { Breadcrumbs } from "./breadcrumbs"
 import type { MonacoEditorHandle } from "./monaco-editor"
 import { api } from "@/lib/api"
 
@@ -277,6 +278,9 @@ export function EditorArea({ activeFile }: EditorAreaProps) {
         onGoToLine={handleGoToLine}
         totalLines={getTotalLines()}
       />
+
+      {/* Breadcrumbs */}
+      <Breadcrumbs filePath={activeTab} />
 
       {/* Tabs for open files */}
       {openFiles.length > 0 ? (
