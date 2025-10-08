@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { GitBranch, GitCommit, GitPullRequest, RefreshCw, Plus, Check, X, Circle } from "lucide-react"
+import { GitBranch, GitCommit, GitPullRequest, RefreshCw, Plus, Check, X, Circle, Eye } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { ScrollArea } from "./ui/scroll-area"
 import { Separator } from "./ui/separator"
 import { Badge } from "./ui/badge"
+import { DiffViewer } from "./diff-viewer"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
@@ -42,6 +43,7 @@ export function GitPanel() {
   const [newBranchName, setNewBranchName] = useState("")
   const [loading, setLoading] = useState(false)
   const [isGitRepo, setIsGitRepo] = useState(true)
+  const [viewingDiff, setViewingDiff] = useState<string | null>(null)
 
   useEffect(() => {
     loadGitData()
@@ -369,21 +371,31 @@ export function GitPanel() {
                           key={file.path}
                           className="group flex items-center justify-between rounded px-2 py-1 hover:bg-accent"
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
                             {getStatusIcon(file.status)}
-                            <span className="text-sm">{file.path}</span>
+                            <span className="text-sm truncate">{file.path}</span>
                             <Badge variant="outline" className="text-xs">
                               {getStatusLabel(file.status)}
                             </Badge>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleUnstageFile(file)}
-                            className="opacity-0 group-hover:opacity-100"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setViewingDiff(file.path)}
+                              title="Ver cambios"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleUnstageFile(file)}
+                              title="Unstage"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                   </div>
@@ -407,34 +419,54 @@ export function GitPanel() {
                           key={file.path}
                           className="group flex items-center justify-between rounded px-2 py-1 hover:bg-accent"
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
                             {getStatusIcon(file.status)}
-                            <span className="text-sm">{file.path}</span>
+                            <span className="text-sm truncate">{file.path}</span>
                             <Badge variant="outline" className="text-xs">
                               {getStatusLabel(file.status)}
                             </Badge>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleStageFile(file)}
-                            className="opacity-0 group-hover:opacity-100"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setViewingDiff(file.path)}
+                              title="Ver cambios"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStageFile(file)}
+                              title="Stage"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                   </div>
                 )}
 
                 {files.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Check className="mb-2 h-12 w-12 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">No hay cambios</p>
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <GitBranch className="mb-2 h-12 w-12 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Sin cambios</p>
                   </div>
                 )}
               </div>
             </ScrollArea>
+
+            {/* Diff Viewer Overlay */}
+            {viewingDiff && (
+              <div className="absolute inset-0 z-10 bg-background">
+                <DiffViewer
+                  filePath={viewingDiff}
+                  onClose={() => setViewingDiff(null)}
+                />
+              </div>
+            )}
           </div>
         )}
 
