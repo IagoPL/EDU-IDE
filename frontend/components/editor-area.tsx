@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { Button } from "./ui/button"
 import { X, Play, Save, Download, FileText, Search } from "lucide-react"
 import { MonacoEditorWrapper as MonacoEditor } from "./monaco-editor-wrapper"
 import { FindReplace, type FindOptions } from "./find-replace"
+import { GoToLine } from "./go-to-line"
+import type { MonacoEditorHandle } from "./monaco-editor"
 import { api } from "@/lib/api"
 
 interface EditorAreaProps {
@@ -25,6 +27,8 @@ export function EditorArea({ activeFile }: EditorAreaProps) {
   const [saving, setSaving] = useState(false)
   const [showFindReplace, setShowFindReplace] = useState(false)
   const [findMode, setFindMode] = useState<"find" | "replace">("find")
+  const [showGoToLine, setShowGoToLine] = useState(false)
+  const editorRef = useRef<MonacoEditorHandle>(null)
 
   // Abrir archivo cuando se selecciona
   useEffect(() => {
@@ -55,11 +59,24 @@ export function EditorArea({ activeFile }: EditorAreaProps) {
         setShowFindReplace(true)
         setFindMode("replace")
       }
+      // Ctrl+G: Go to Line
+      else if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+        e.preventDefault()
+        setShowGoToLine(true)
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [activeTab, openFiles])
+
+  const handleGoToLine = (line: number) => {
+    editorRef.current?.goToLine(line)
+  }
+
+  const getTotalLines = () => {
+    return editorRef.current?.getTotalLines() || 0
+  }
 
   const loadFile = async (filePath: string) => {
     const response = await api.readFile(filePath)
@@ -253,6 +270,14 @@ export function EditorArea({ activeFile }: EditorAreaProps) {
         />
       )}
 
+      {/* Go to Line Dialog */}
+      <GoToLine
+        open={showGoToLine}
+        onOpenChange={setShowGoToLine}
+        onGoToLine={handleGoToLine}
+        totalLines={getTotalLines()}
+      />
+
       {/* Tabs for open files */}
       {openFiles.length > 0 ? (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0 overflow-hidden">
@@ -287,6 +312,7 @@ export function EditorArea({ activeFile }: EditorAreaProps) {
               className="flex-1 min-h-0 p-0 m-0 data-[state=active]:flex overflow-hidden"
             >
               <MonacoEditor
+                ref={editorRef}
                 value={file.content}
                 language={file.language}
                 onChange={(newContent) => handleContentChange(file.path, newContent)}

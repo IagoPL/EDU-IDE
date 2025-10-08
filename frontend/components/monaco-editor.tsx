@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useImperativeHandle, forwardRef } from "react"
 import Editor, { OnMount, BeforeMount } from "@monaco-editor/react"
 import type { editor } from "monaco-editor"
 
@@ -11,8 +11,30 @@ interface MonacoEditorProps {
   theme?: string
 }
 
-export function MonacoEditor({ value, language, onChange, theme = "vs-dark" }: MonacoEditorProps) {
+export interface MonacoEditorHandle {
+  goToLine: (line: number) => void
+  getEditor: () => editor.IStandaloneCodeEditor | null
+  getTotalLines: () => number
+}
+
+export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
+  function MonacoEditor({ value, language, onChange, theme = "vs-dark" }, ref) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+
+  // Exponer métodos a componentes padres
+  useImperativeHandle(ref, () => ({
+    goToLine: (line: number) => {
+      if (editorRef.current) {
+        editorRef.current.revealLineInCenter(line)
+        editorRef.current.setPosition({ lineNumber: line, column: 1 })
+        editorRef.current.focus()
+      }
+    },
+    getEditor: () => editorRef.current,
+    getTotalLines: () => {
+      return editorRef.current?.getModel()?.getLineCount() || 0
+    }
+  }))
 
   const handleEditorWillMount: BeforeMount = (monaco) => {
     // Configurar opciones globales de Monaco antes de que se monte
@@ -154,4 +176,4 @@ export function MonacoEditor({ value, language, onChange, theme = "vs-dark" }: M
       }}
     />
   )
-}
+})

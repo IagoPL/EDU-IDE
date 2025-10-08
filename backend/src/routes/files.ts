@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { FileSystemService } from '../services/FileSystemService';
 import path from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -296,6 +296,161 @@ router.post('/open-file-picker', async (req, res) => {
       return res.json({ success: true, data: { cancelled: true } });
     }
     
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+// Buscar en archivos (Find in Files)
+router.post('/search', async (req, res) => {
+  try {
+    const { 
+      query, 
+      caseSensitive = false, 
+      useRegex = false, 
+      wholeWord = false,
+      includePattern = '*',
+      excludePattern = 'node_modules,dist,.git'
+    } = req.body;
+
+    if (!query) {
+      return res.status(400).json({ success: false, error: 'Query is required' });
+    }
+
+    const workspacePath = fileSystemService.getWorkspacePath();
+    const results: Array<{
+      file: string;
+      line: number;
+      column: number;
+      text: string;
+      matchStart: number;
+      matchEnd: number;
+    }> = [];
+
+    // Parsear patrones de exclusión
+    const excludePatterns = excludePattern.split(',').map(p => p.trim()).filter(Boolean);
+    
+    // Función para verificar si un path debe ser excluido
+    const shouldExclude = (filePath: string): boolean => {
+      return excludePatterns.some(pattern => 
+        filePath.includes(pattern) || filePath.includes(`/${pattern}/`) || filePath.includes(`\\${pattern}\\`)
+      );
+    };
+
+    // Crear expresión regular para búsqueda
+    let searchRegex: RegExp;
+    try {
+      if (useRegex) {
+        searchRegex = new RegExp(query, caseSensitive ? 'g' : 'gi');
+      } else {
+        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = wholeWord ? `\\b${escapedQuery}\\b` : escapedQuery;
+        searchRegex = new RegExp(pattern, caseSensitive ? 'g' : 'gi');
+      }
+    } catch (error) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid regex pattern' 
+      });
+    }
+
+    // Función recursiva para buscar en archivos
+    const searchInDirectory = (dirPath: string, basePath: string = '') => {
+      try {
+        const entries = readdirSync(dirPath);
+
+        for (const entry of entries) {
+          const fullPath = path.join(dirPath, entry);
+          const relativePath = basePath ? `${basePath}/${entry}` : entry;
+
+          // Saltar si está en la lista de exclusión
+          if (shouldExclude(relativePath)) {
+            continue;
+          }
+
+          try {
+            const stats = statSync(fullPath);
+
+            if (stats.isDirectory()) {
+              searchInDirectory(fullPath, relativePath);
+            } else if (stats.isFile()) {
+              // Solo buscar en archivos de texto (evitar binarios)
+              const ext = path.extname(entry).toLowerCase();
+              const textExtensions = [
+                '.js', '.ts', '.jsx', '.tsx', '.json', '.html', '.css', '.scss',
+                '.py', '.java', '.c', '.cpp', '.h', '.cs', '.go', '.rs',
+                '.md', '.txt', '.xml', '.yaml', '.yml', '.toml', '.ini',
+                '.sh', '.bash', '.sql', '.graphql', '.vue', '.svelte'
+              ];
+
+              if (!textExtensions.includes(ext) && includePattern === '*') {
+                continue;
+              }
+
+              // Aplicar filtro de inclusión
+              if (includePattern !== '*') {
+                const includePatterns = includePattern.split(',').map(p => p.trim());
+                const matchesInclude = includePatterns.some(pattern => {
+                  if (pattern.startsWith('*.')) {
+                    return entry.endsWith(pattern.substring(1));
+                  }
+                  return entry.includes(pattern);
+                });
+                if (!matchesInclude) {
+                  continue;
+                }
+              }
+
+              // Leer y buscar en el archivo
+              try {
+                const content = readFileSync(fullPath, 'utf-8');
+                const lines = content.split('\n');
+
+                lines.forEach((line, lineIndex) => {
+                  const matches = Array.from(line.matchAll(searchRegex));
+                  
+                  matches.forEach(match => {
+                    if (match.index !== undefined) {
+                      results.push({
+                        file: relativePath,
+                        line: lineIndex + 1,
+                        column: match.index + 1,
+                        text: line.trim(),
+                        matchStart: match.index - (line.length - line.trimStart().length),
+                        matchEnd: match.index + match[0].length - (line.length - line.trimStart().length)
+                      });
+                    }
+                  });
+                });
+              } catch (readError) {
+                // Ignorar archivos que no se pueden leer (binarios, permisos, etc.)
+              }
+            }
+          } catch (statError) {
+            // Ignorar archivos/carpetas con errores de permisos
+          }
+        }
+      } catch (dirError) {
+        // Ignorar directorios con errores de permisos
+      }
+    };
+
+    // Iniciar búsqueda
+    searchInDirectory(workspacePath);
+
+    // Limitar resultados para evitar sobrecarga
+    const maxResults = 1000;
+    const limitedResults = results.slice(0, maxResults);
+
+    res.json({ 
+      success: true, 
+      data: limitedResults,
+      truncated: results.length > maxResults,
+      totalFound: results.length
+    });
+  } catch (error) {
     res.status(500).json({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error' 

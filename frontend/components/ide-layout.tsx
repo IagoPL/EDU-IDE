@@ -93,9 +93,30 @@ export function IDELayout() {
       case "view.explorer":
         setSidebarOpen(true)
         break
+      case "view.search":
+        setRightPanelOpen(true)
+        break
       // ... más comandos
     }
   }
+
+  // Atajo para abrir búsqueda (Ctrl+Shift+F)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F') {
+        e.preventDefault()
+        setRightPanelOpen(true)
+        // Focus en el tab de búsqueda
+        setTimeout(() => {
+          const searchTab = document.querySelector('[value="search"]') as HTMLElement
+          searchTab?.click()
+        }, 100)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   return (
     <div className="flex h-screen w-full flex-col bg-background overflow-hidden">
@@ -139,7 +160,7 @@ export function IDELayout() {
           {/* Right Panel */}
           {rightPanelOpen && (
             <div className="w-80 flex-shrink-0 border-l border-border">
-              <RightPanel />
+              <RightPanel onFileSelect={handleFileOpen} />
             </div>
           )}
         </div>

@@ -1,27 +1,40 @@
 "use client"
 
 import { useState } from "react"
-import { Bot, TerminalIcon, MessageSquare } from "lucide-react"
+import { Bot, TerminalIcon, MessageSquare, Search } from "lucide-react"
 import { Button } from "./ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { Input } from "./ui/input"
 import { ScrollArea } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { FindInFiles } from "./find-in-files"
 
-export function RightPanel() {
+interface RightPanelProps {
+  onFileSelect?: (file: string, line?: number) => void
+}
+
+export function RightPanel({ onFileSelect }: RightPanelProps) {
   return (
     <div className="flex h-full w-full flex-col border-l border-border bg-card/95 backdrop-blur-sm overflow-hidden">
-      <Tabs defaultValue="assistant" className="flex h-full flex-col overflow-hidden">
+      <Tabs defaultValue="search" className="flex h-full flex-col overflow-hidden">
         <TabsList className="flex-shrink-0 w-full justify-start rounded-none border-b border-border bg-transparent">
+          <TabsTrigger value="search" className="gap-2">
+            <Search className="h-4 w-4" />
+            Buscar
+          </TabsTrigger>
           <TabsTrigger value="assistant" className="gap-2">
             <Bot className="h-4 w-4" />
-            Asistente IA
+            IA
           </TabsTrigger>
           <TabsTrigger value="terminal" className="gap-2">
             <TerminalIcon className="h-4 w-4" />
             Terminal
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="search" className="flex-1 min-h-0 p-0 m-0 data-[state=active]:flex overflow-hidden">
+          <FindInFiles onFileSelect={onFileSelect} />
+        </TabsContent>
 
         <TabsContent value="assistant" className="flex-1 min-h-0 p-0 m-0 data-[state=active]:flex overflow-hidden">
           <AssistantPanel />

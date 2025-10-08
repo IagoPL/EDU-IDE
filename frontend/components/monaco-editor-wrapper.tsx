@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, lazy, Suspense } from "react"
+import { useState, useEffect, lazy, Suspense, useRef, forwardRef, useImperativeHandle } from "react"
 import { SimpleCodeEditor } from "./simple-code-editor"
 import { Skeleton } from "./ui/skeleton"
+import type { MonacoEditorHandle } from "./monaco-editor"
 
 interface MonacoEditorProps {
   value: string
@@ -14,9 +15,24 @@ interface MonacoEditorProps {
 // Lazy load Monaco Editor - solo se carga cuando se usa
 const MonacoEditor = lazy(() => import("./monaco-editor").then(mod => ({ default: mod.MonacoEditor })))
 
-export function MonacoEditorWrapper(props: MonacoEditorProps) {
+export const MonacoEditorWrapper = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
+  function MonacoEditorWrapper(props, ref) {
   const [useMonaco, setUseMonaco] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const editorRef = useRef<MonacoEditorHandle>(null)
+
+  // Exponer métodos del editor
+  useImperativeHandle(ref, () => ({
+    goToLine: (line: number) => {
+      editorRef.current?.goToLine(line)
+    },
+    getEditor: () => {
+      return editorRef.current?.getEditor() || null
+    },
+    getTotalLines: () => {
+      return editorRef.current?.getTotalLines() || 0
+    }
+  }))
 
   // Detectar si debemos usar Monaco basado en el tamaño del archivo o preferencias
   useEffect(() => {
@@ -54,12 +70,12 @@ export function MonacoEditorWrapper(props: MonacoEditorProps) {
           <Skeleton className="h-full w-full" />
         </div>
       }>
-        <MonacoEditor {...props} />
+        <MonacoEditor ref={editorRef} {...props} />
       </Suspense>
     )
   }
 
   // Usar editor simple por defecto para mejor rendimiento inicial
   return <SimpleCodeEditor {...props} />
-}
+})
 

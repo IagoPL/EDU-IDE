@@ -216,6 +216,27 @@ class ApiClient {
     });
   }
 
+  async searchInFiles(params: {
+    query: string;
+    caseSensitive?: boolean;
+    useRegex?: boolean;
+    wholeWord?: boolean;
+    includePattern?: string;
+    excludePattern?: string;
+  }): Promise<ApiResponse<Array<{
+    file: string;
+    line: number;
+    column: number;
+    text: string;
+    matchStart: number;
+    matchEnd: number;
+  }>>> {
+    return this.request('/api/files/search', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+  }
+
   // Projects API
   async getProjects(): Promise<ApiResponse<any[]>> {
     return this.request<any[]>('/api/projects');
