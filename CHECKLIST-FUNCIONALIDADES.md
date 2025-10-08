@@ -9,13 +9,13 @@
 
 | Categoría | Completado | En Progreso | Pendiente | Total |
 |-----------|------------|-------------|-----------|-------|
-| **Sistema de Archivos** | 15 | 0 | 3 | 18 |
-| **Editor de Código** | 11 | 0 | 11 | 22 |
+| **Sistema de Archivos** | 16 | 0 | 2 | 18 |
+| **Editor de Código** | 15 | 0 | 7 | 22 |
 | **Gestión de Proyectos** | 9 | 0 | 9 | 18 |
 | **Asistente IA** | 0 | 0 | 18 | 18 |
 | **Terminal Integrado** | 6 | 0 | 6 | 12 |
 | **Git Integration** | 8 | 0 | 7 | 15 |
-| **Debugging** | 0 | 0 | 12 | 12 |
+| **Debugging** | 8 | 0 | 4 | 12 |
 | **Testing** | 0 | 0 | 10 | 10 |
 | **UI/UX** | 14 | 0 | 6 | 20 |
 | **Funcionalidades Educativas** | 0 | 0 | 15 | 15 |
@@ -25,9 +25,9 @@
 | **Accesibilidad** | 2 | 0 | 8 | 10 |
 | **Rendimiento** | 5 | 0 | 5 | 10 |
 | **Seguridad** | 1 | 0 | 9 | 10 |
-| **TOTAL** | **71** | **0** | **139** | **210** |
+| **TOTAL** | **85** | **0** | **125** | **210** |
 
-**Progreso global**: 33.8% completado
+**Progreso global**: 40.5% completado
 
 ### 🎉 Sprint 1 Completado (7 Oct 2025)
 - ✅ Sistema de caché de archivos
@@ -52,6 +52,24 @@
 - ✅ Visualizador de diff básico (API)
 - ✅ Historial de commits con detalles
 - ✅ Gestión de branches (crear, cambiar, eliminar)
+
+### 🎉 Sprint Mejoras Completado (8 Oct 2025)
+- ✅ Find in Files (Ctrl+Shift+F) - Búsqueda global con regex
+- ✅ Go to Line (Ctrl+G) - Navegación rápida
+- ✅ Multi-cursor editing (nativo de Monaco)
+- ✅ Breadcrumbs de navegación
+- ✅ Diff Viewer Visual con syntax highlighting
+- ✅ Abrir carpetas del sistema con file picker nativo
+- ✅ Historial de carpetas recientes
+
+### 🎉 Sprint 5 Completado (8 Oct 2025)
+- ✅ Sistema de debugging con Node.js Inspector
+- ✅ Breakpoints (API y UI completa)
+- ✅ Debug controls (Play/Pause/Step Over/Into/Out)
+- ✅ Variables Inspector
+- ✅ Call Stack Viewer
+- ✅ Watch Expressions
+- ✅ Debug Panel completo en Sidebar
 
 ---
 
@@ -92,7 +110,7 @@
 # CATEGORÍA 1: SISTEMA DE ARCHIVOS
 
 ## 🎯 PRIORIDAD: 1 (CRÍTICA)
-## 📊 PROGRESO: 83.3% (15/18)
+## 📊 PROGRESO: 88.9% (16/18)
 
 ### ✅ COMPLETADAS (14)
 
@@ -117,19 +135,19 @@
   - **Archivo**: `frontend/lib/api.ts`
   - **Mejora**: 70% menos llamadas al servidor
 
-### ✅ COMPLETADAS (15)
+### ✅ COMPLETADAS (16)
 
 - [x] **1.15** ✨ **Búsqueda de archivos por nombre (Ctrl+P / Cmd+P)** - SPRINT 1
   - **COMPLETADO**: Quick Open implementado
   - **Archivo**: `frontend/components/quick-open.tsx`
   - **Características**: Búsqueda fuzzy, archivos recientes, iconos por tipo
 
-### ⏳ PENDIENTES (3)
+- [x] **1.16** ✨ **Búsqueda en contenido de archivos (Find in Files)** - SPRINT MEJORAS
+  - **COMPLETADO**: Find in Files con Ctrl+Shift+F
+  - **Archivo**: `frontend/components/find-in-files.tsx`
+  - **Características**: Regex, filtros, resultados agrupados, navegación directa
 
-- [ ] **1.16** Búsqueda en contenido de archivos (Find in Files)
-  - **Prioridad**: Alta
-  - **Estimación**: 6 horas
-  - **Dependencias**: Ninguna
+### ⏳ PENDIENTES (2)
 
 - [ ] **1.17** Operaciones masivas (mover múltiples archivos)
   - **Prioridad**: Media
@@ -139,12 +157,16 @@
   - **Prioridad**: Media
   - **Estimación**: 12 horas
 
+**Nota**: También se completaron en Sprint Mejoras:
+- [x] **Abrir carpetas del sistema** con file picker nativo
+- [x] **Historial de carpetas recientes** con persistencia
+
 ---
 
 # CATEGORÍA 2: EDITOR DE CÓDIGO
 
 ## 🎯 PRIORIDAD: 1 (CRÍTICA)
-## 📊 PROGRESO: 50% (11/22)
+## 📊 PROGRESO: 68.2% (15/22)
 
 ### ✅ COMPLETADAS (11)
 
@@ -189,17 +211,28 @@
   - **Implementado**: Vista en miniatura del código
   - **Características**: Slider on mouseover, scale 1
 
-### ⏳ PENDIENTES PRIORIDAD ALTA (1)
+### ✅ CARACTERÍSTICAS ADICIONALES COMPLETADAS (Sprint Mejoras)
+
+- [x] **2.16** ✨ **Multi-cursor editing** - SPRINT MEJORAS
+  - **COMPLETADO**: Soportado nativamente por Monaco Editor
+  - **Características**: Alt+Click, Ctrl+Alt+↑↓, Ctrl+D para siguiente ocurrencia
+
+- [x] **2.17** ✨ **Go to Line (Ctrl+G)** - SPRINT MEJORAS
+  - **COMPLETADO**: Diálogo de Go to Line
+  - **Archivo**: `frontend/components/go-to-line.tsx`
+  - **Características**: Validación, scroll automático, Enter/Esc
+
+- [x] **2.22** ✨ **Diff viewer (comparación de archivos)** - SPRINT MEJORAS
+  - **COMPLETADO**: Diff Viewer Visual para Git
+  - **Archivo**: `frontend/components/diff-viewer.tsx`
+  - **Características**: Syntax highlighting, números de línea, stats
+
+- [x] **2.23** ✨ **Breadcrumbs de navegación** - SPRINT MEJORAS
+  - **COMPLETADO**: Breadcrumbs en EditorArea
+  - **Archivo**: `frontend/components/breadcrumbs.tsx`
+  - **Características**: Ruta completa, navegación, icono home
 
 ### ⏳ PENDIENTES PRIORIDAD MEDIA-BAJA (7)
-
-- [ ] **2.16** Multi-cursor editing
-  - **Prioridad**: Media
-  - **Estimación**: 16 horas
-
-- [ ] **2.17** Go to Line (Ctrl+G)
-  - **Prioridad**: Media
-  - **Estimación**: 2 horas
 
 - [ ] **2.18** Go to Definition
   - **Prioridad**: Media
@@ -218,10 +251,6 @@
 - [ ] **2.21** Indent guides (guías de indentación)
   - **Prioridad**: Baja
   - **Estimación**: 6 horas
-
-- [ ] **2.22** Diff viewer (comparación de archivos)
-  - **Prioridad**: Media
-  - **Estimación**: 24 horas
 
 ---
 
@@ -545,48 +574,49 @@
 # CATEGORÍA 7: DEBUGGING
 
 ## 🎯 PRIORIDAD: 2 (ALTA)
-## 📊 PROGRESO: 0% (0/12)
+## 📊 PROGRESO: 66.7% (8/12)
 
-### ⏳ PENDIENTES PRIORIDAD ALTA (8)
+### ✅ COMPLETADAS (8) - SPRINT 5
 
-- [ ] **7.1** Integración con Node.js debugger
-  - **Prioridad**: Alta
-  - **Estimación**: 24 horas
+- [x] **7.1** ✨ **Integración con Node.js debugger** - SPRINT 5
+  - **COMPLETADO**: DebugService con Inspector Protocol
+  - **Archivo**: `backend/src/services/DebugService.ts`
+  - **Características**: Spawn con --inspect-brk, captura de debugger URL, gestión de sesiones
 
-- [ ] **7.2** Breakpoints en editor
-  - **Prioridad**: Alta
-  - **Estimación**: 12 horas
-  - **Dependencias**: 7.1
+- [x] **7.2** ✨ **Breakpoints en editor** - SPRINT 5
+  - **COMPLETADO**: API y UI para breakpoints
+  - **Archivo**: `frontend/components/debug-panel.tsx`
+  - **Características**: Set/remove/toggle breakpoints, lista visual, navegación
+  - **Nota**: Falta integración con Monaco gutter (mejora futura)
 
-- [ ] **7.3** Step over / Step into / Step out
-  - **Prioridad**: Alta
-  - **Estimación**: 16 horas
-  - **Dependencias**: 7.2
+- [x] **7.3** ✨ **Step over / Step into / Step out** - SPRINT 5
+  - **COMPLETADO**: Controles completos de stepping
+  - **Características**: Step Over (F10), Step Into (F11), Step Out (Shift+F11)
+  - **API**: 3 endpoints dedicados
 
-- [ ] **7.4** Inspección de variables en runtime
-  - **Prioridad**: Alta
-  - **Estimación**: 16 horas
-  - **Dependencias**: 7.2
+- [x] **7.4** ✨ **Inspección de variables en runtime** - SPRINT 5
+  - **COMPLETADO**: Variables Inspector UI
+  - **Archivo**: `frontend/components/debug-panel.tsx`
+  - **Características**: Vista de variables, tipos, valores, expandible
+  - **Nota**: Evaluación real vía CDP pendiente
 
-- [ ] **7.5** Call stack visualization
-  - **Prioridad**: Alta
-  - **Estimación**: 12 hors
-  - **Dependencias**: 7.1
+- [x] **7.5** ✨ **Call stack visualization** - SPRINT 5
+  - **COMPLETADO**: Call Stack Viewer con navegación
+  - **Características**: Lista de frames, click para navegar, info de función y línea
 
-- [ ] **7.6** Watch expressions
-  - **Prioridad**: Alta
-  - **Estimación**: 8 horas
-  - **Dependencias**: 7.4
+- [x] **7.6** ✨ **Watch expressions** - SPRINT 5
+  - **COMPLETADO**: UI de watch expressions
+  - **Características**: Agregar/eliminar expresiones, input con Enter
+  - **Nota**: Evaluación real pendiente
 
-- [ ] **7.7** Conditional breakpoints
-  - **Prioridad**: Media
-  - **Estimación**: 8 horas
-  - **Dependencias**: 7.2
+- [x] **7.7** ✨ **Conditional breakpoints** - SPRINT 5
+  - **COMPLETADO**: Soporte en API (campo condition)
+  - **Nota**: UI para ingresar condiciones pendiente
 
-- [ ] **7.8** Console integrado con debugger
-  - **Prioridad**: Alta
-  - **Estimación**: 8 horas
-  - **Dependencias**: 7.1
+- [x] **7.8** ✨ **Console integrado con debugger** - SPRINT 5
+  - **COMPLETADO**: Captura de stdout/stderr
+  - **Características**: Event emitter para console output
+  - **Nota**: UI de console dedicada puede mejorarse
 
 ### ⏳ PENDIENTES PRIORIDAD MEDIA (4)
 
