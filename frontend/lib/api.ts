@@ -462,6 +462,81 @@ class ApiClient {
     });
   }
 
+  // Git Stash
+  async gitStash(message?: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/stash', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  }
+
+  async gitStashList(): Promise<ApiResponse<Array<{ index: number; message: string; hash: string }>>> {
+    return this.request('/api/git/stash/list');
+  }
+
+  async gitStashApply(index: number = 0): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/stash/apply', {
+      method: 'POST',
+      body: JSON.stringify({ index }),
+    });
+  }
+
+  async gitStashPop(index: number = 0): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/stash/pop', {
+      method: 'POST',
+      body: JSON.stringify({ index }),
+    });
+  }
+
+  async gitStashDrop(index: number): Promise<ApiResponse<{ message: string }>> {
+    return this.request(`/api/git/stash/${index}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Git Remotes
+  async gitAddRemote(name: string, url: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/remote/add', {
+      method: 'POST',
+      body: JSON.stringify({ name, url }),
+    });
+  }
+
+  async gitRemoveRemote(name: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request(`/api/git/remote/${name}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Git Blame
+  async gitBlame(file: string): Promise<ApiResponse<Array<{
+    line: number;
+    author: string;
+    hash: string;
+    date: string;
+    content: string;
+  }>>> {
+    return this.request(`/api/git/blame?file=${encodeURIComponent(file)}`);
+  }
+
+  // Git Tags
+  async gitGetTags(): Promise<ApiResponse<Array<{ name: string; hash: string; message?: string }>>> {
+    return this.request('/api/git/tags');
+  }
+
+  async gitCreateTag(name: string, message?: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request('/api/git/tag', {
+      method: 'POST',
+      body: JSON.stringify({ name, message }),
+    });
+  }
+
+  async gitDeleteTag(name: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request(`/api/git/tag/${name}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Debug API
   async startDebug(file: string, args: string[] = []): Promise<ApiResponse<any>> {
     return this.request('/api/debug/start', {

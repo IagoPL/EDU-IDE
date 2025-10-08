@@ -485,5 +485,212 @@ router.post('/config', async (req: Request, res: Response) => {
   }
 });
 
+// Git Stash endpoints
+router.post('/stash', async (req: Request, res: Response) => {
+  try {
+    const { message } = req.body;
+    const gitService = new GitService(WORKSPACE_PATH);
+    await gitService.stash(message);
+    
+    res.json({
+      success: true,
+      message: 'Cambios guardados en stash'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to stash',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+router.get('/stash/list', async (req: Request, res: Response) => {
+  try {
+    const gitService = new GitService(WORKSPACE_PATH);
+    const stashes = await gitService.stashList();
+    
+    res.json({
+      success: true,
+      data: stashes
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to list stashes',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+router.post('/stash/apply', async (req: Request, res: Response) => {
+  try {
+    const { index = 0 } = req.body;
+    const gitService = new GitService(WORKSPACE_PATH);
+    await gitService.stashApply(index);
+    
+    res.json({
+      success: true,
+      message: `Stash ${index} aplicado`
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to apply stash',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+router.post('/stash/pop', async (req: Request, res: Response) => {
+  try {
+    const { index = 0 } = req.body;
+    const gitService = new GitService(WORKSPACE_PATH);
+    await gitService.stashPop(index);
+    
+    res.json({
+      success: true,
+      message: `Stash ${index} aplicado y eliminado`
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to pop stash',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+router.delete('/stash/:index', async (req: Request, res: Response) => {
+  try {
+    const index = parseInt(req.params.index);
+    const gitService = new GitService(WORKSPACE_PATH);
+    await gitService.stashDrop(index);
+    
+    res.json({
+      success: true,
+      message: `Stash ${index} eliminado`
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to drop stash',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Remote endpoints
+router.post('/remote/add', async (req: Request, res: Response) => {
+  try {
+    const { name, url } = req.body;
+    const gitService = new GitService(WORKSPACE_PATH);
+    await gitService.addRemote(name, url);
+    
+    res.json({
+      success: true,
+      message: `Remoto '${name}' agregado`
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to add remote',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+router.delete('/remote/:name', async (req: Request, res: Response) => {
+  try {
+    const { name } = req.params;
+    const gitService = new GitService(WORKSPACE_PATH);
+    await gitService.removeRemote(name);
+    
+    res.json({
+      success: true,
+      message: `Remoto '${name}' eliminado`
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to remove remote',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Git Blame endpoint
+router.get('/blame', async (req: Request, res: Response) => {
+  try {
+    const { file } = req.query;
+    
+    if (!file || typeof file !== 'string') {
+      return res.status(400).json({
+        error: 'File parameter is required'
+      });
+    }
+    
+    const gitService = new GitService(WORKSPACE_PATH);
+    const blame = await gitService.blame(file);
+    
+    res.json({
+      success: true,
+      data: blame
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to get blame',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Git Tags endpoints
+router.get('/tags', async (req: Request, res: Response) => {
+  try {
+    const gitService = new GitService(WORKSPACE_PATH);
+    const tags = await gitService.getTags();
+    
+    res.json({
+      success: true,
+      data: tags
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to get tags',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+router.post('/tag', async (req: Request, res: Response) => {
+  try {
+    const { name, message } = req.body;
+    const gitService = new GitService(WORKSPACE_PATH);
+    await gitService.createTag(name, message);
+    
+    res.json({
+      success: true,
+      message: `Tag '${name}' creado`
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to create tag',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+router.delete('/tag/:name', async (req: Request, res: Response) => {
+  try {
+    const { name } = req.params;
+    const gitService = new GitService(WORKSPACE_PATH);
+    await gitService.deleteTag(name);
+    
+    res.json({
+      success: true,
+      message: `Tag '${name}' eliminado`
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to delete tag',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 export default router;
 

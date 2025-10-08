@@ -322,5 +322,221 @@ export class GitService {
       return {};
     }
   }
+
+  /**
+   * Git Stash - Guardar cambios temporalmente
+   */
+  async stash(message?: string): Promise<void> {
+    const git = this.getGit();
+    if (message) {
+      await git.stash(['push', '-m', message]);
+    } else {
+      await git.stash();
+    }
+  }
+
+  /**
+   * Listar stashes
+   */
+  async stashList(): Promise<Array<{ index: number; message: string; hash: string }>> {
+    const git = this.getGit();
+    const result = await git.stashList();
+    
+    return result.all.map((stash, index) => ({
+      index,
+      message: stash.message,
+      hash: stash.hash
+    }));
+  }
+
+  /**
+   * Aplicar stash
+   */
+  async stashApply(index: number = 0): Promise<void> {
+    const git = this.getGit();
+    await git.stash(['apply', `stash@{${index}}`]);
+  }
+
+  /**
+   * Eliminar stash
+   */
+  async stashDrop(index: number = 0): Promise<void> {
+    const git = this.getGit();
+    await git.stash(['drop', `stash@{${index}}`]);
+  }
+
+  /**
+   * Aplicar y eliminar stash
+   */
+  async stashPop(index: number = 0): Promise<void> {
+    const git = this.getGit();
+    await git.stash(['pop', `stash@{${index}}`]);
+  }
+
+  /**
+   * Obtener remotos configurados
+   */
+  async getRemotes(): Promise<Array<{ name: string; url: string }>> {
+    const git = this.getGit();
+    const remotes = await git.getRemotes(true);
+    
+    return remotes.map(remote => ({
+      name: remote.name,
+      url: remote.refs.fetch || remote.refs.push || ''
+    }));
+  }
+
+  /**
+   * Agregar remoto
+   */
+  async addRemote(name: string, url: string): Promise<void> {
+    const git = this.getGit();
+    await git.addRemote(name, url);
+  }
+
+  /**
+   * Eliminar remoto
+   */
+  async removeRemote(name: string): Promise<void> {
+    const git = this.getGit();
+    await git.removeRemote(name);
+  }
+
+  /**
+   * Obtener blame de un archivo (quién modificó cada línea)
+   */
+  async blame(file: string): Promise<Array<{
+    line: number;
+    author: string;
+    hash: string;
+    date: string;
+    content: string;
+  }>> {
+    const git = this.getGit();
+    
+    try {
+      // simple-git no tiene blame directo, usamos raw
+      const result = await git.raw(['blame', '--line-porcelain', file]);
+      
+      return this.parseBlameOutput(result);
+    } catch (error) {
+      throw new Error(`Error getting blame: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Parsear output de git blame
+   */
+  private parseBlameOutput(blameOutput: string): Array<{
+    line: number;
+    author: string;
+    hash: string;
+    date: string;
+    content: string;
+  }> {
+    const lines = blameOutput.split('\n');
+    const result = [];
+    let currentHash = '';
+    let currentAuthor = '';
+    let currentDate = '';
+    let lineNumber = 0;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.match(/^[0-9a-f]{40}/)) {
+        currentHash = line.split(' ')[0];
+        lineNumber++;
+      } else if (line.startsWith('author ')) {
+        currentAuthor = line.substring(7);
+      } else if (line.startsWith('author-time ')) {
+        const timestamp = parseInt(line.substring(12));
+        currentDate = new Date(timestamp * 1000).toISOString();
+      } else if (line.startsWith('\t')) {
+        result.push({
+          line: lineNumber,
+          author: currentAuthor,
+          hash: currentHash.substring(0, 8),
+          date: currentDate,
+          content: line.substring(1)
+        });
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Obtener tags
+   */
+  async getTags(): Promise<Array<{ name: string; hash: string; message?: string }>> {
+    const git = this.getGit();
+    const tags = await git.tags();
+    
+    return Promise.all(
+      tags.all.map(async (tag) => {
+        try {
+          const show = await git.show([tag]);
+          return {
+            name: tag,
+            hash: show.substring(0, 40),
+            message: show.split('\n')[4] || ''
+          };
+        } catch {
+          return {
+            name: tag,
+            hash: '',
+            message: ''
+          };
+        }
+      })
+    );
+  }
+
+  /**
+   * Crear tag
+   */
+  async createTag(name: string, message?: string): Promise<void> {
+    const git = this.getGit();
+    if (message) {
+      await git.addTag(name);
+      await git.tag(['-a', name, '-m', message, '-f']);
+    } else {
+      await git.addTag(name);
+    }
+  }
+
+  /**
+   * Eliminar tag
+   */
+  async deleteTag(name: string): Promise<void> {
+    const git = this.getGit();
+    await git.tag(['-d', name]);
+  }
+
+  /**
+   * Obtener archivo en un commit específico
+   */
+  async getFileAtCommit(file: string, commit: string): Promise<string> {
+    const git = this.getGit();
+    
+    try {
+      const content = await git.show([`${commit}:${file}`]);
+      return content;
+    } catch (error) {
+      throw new Error(`Error getting file at commit: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Actualizar workspace path
+   */
+  setWorkspace(workspacePath: string) {
+    this.workspacePath = workspacePath;
+  }
+
+  getWorkspacePath(): string {
+    return this.workspacePath;
+  }
 }
 
