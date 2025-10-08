@@ -5,6 +5,7 @@ import filesRouter from './routes/files';
 import projectsRouter from './routes/projects';
 import terminalRouter from './routes/terminal';
 import gitRouter from './routes/git';
+import debugRouter from './routes/debug';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.get('/api', (req, res) => {
       projects: '/api/projects',
       terminal: '/api/terminal',
       git: '/api/git',
+      debug: '/api/debug',
       ai: '/api/ai'
     }
   });
@@ -42,6 +44,7 @@ app.use('/api/files', filesRouter);
 app.use('/api/projects', projectsRouter);
 app.use('/api/terminal', terminalRouter);
 app.use('/api/git', gitRouter);
+app.use('/api/debug', debugRouter);
 
 // Start server
 app.listen(PORT, () => {
@@ -53,6 +56,7 @@ app.listen(PORT, () => {
   console.log(`   - Files: http://localhost:${PORT}/api/files`);
   console.log(`   - Terminal: http://localhost:${PORT}/api/terminal`);
   console.log(`   - Git: http://localhost:${PORT}/api/git`);
+  console.log(`   - Debug: http://localhost:${PORT}/api/debug`);
 });
 
 
