@@ -209,6 +209,13 @@ class ApiClient {
     });
   }
 
+  async openFilePicker(defaultPath?: string): Promise<ApiResponse<{ path?: string; cancelled: boolean }>> {
+    return this.request<{ path?: string; cancelled: boolean }>('/api/files/open-file-picker', {
+      method: 'POST',
+      body: JSON.stringify({ defaultPath }),
+    });
+  }
+
   // Projects API
   async getProjects(): Promise<ApiResponse<any[]>> {
     return this.request<any[]>('/api/projects');

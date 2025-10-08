@@ -2,6 +2,10 @@ import { Router } from 'express';
 import { FileSystemService } from '../services/FileSystemService';
 import path from 'path';
 import { existsSync } from 'fs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const router = Router();
 const fileSystemService = new FileSystemService();
@@ -245,6 +249,53 @@ router.post('/validate-path', async (req, res) => {
 
     res.json({ success: true, data: { valid: true } });
   } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+// Abrir explorador de archivos del sistema
+router.post('/open-file-picker', async (req, res) => {
+  try {
+    const { defaultPath } = req.body;
+    const platform = process.platform;
+    
+    let command = '';
+    const startPath = defaultPath || process.cwd();
+    
+    // Comando según el sistema operativo
+    if (platform === 'win32') {
+      // Windows: usar PowerShell para abrir el selector de carpetas
+      command = `powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $browser = New-Object System.Windows.Forms.FolderBrowserDialog; $browser.Description = 'Selecciona una carpeta'; $browser.SelectedPath = '${startPath}'; if ($browser.ShowDialog() -eq 'OK') { Write-Output $browser.SelectedPath }"`;
+    } else if (platform === 'darwin') {
+      // macOS: usar osascript
+      command = `osascript -e 'POSIX path of (choose folder with prompt "Selecciona una carpeta" default location POSIX file "${startPath}")'`;
+    } else {
+      // Linux: usar zenity o kdialog
+      command = `zenity --file-selection --directory --filename="${startPath}/" 2>/dev/null || kdialog --getexistingdirectory "${startPath}" 2>/dev/null`;
+    }
+    
+    const { stdout, stderr } = await execAsync(command);
+    
+    if (stderr && !stdout) {
+      return res.json({ success: true, data: { cancelled: true } });
+    }
+    
+    const selectedPath = stdout.trim();
+    
+    if (!selectedPath) {
+      return res.json({ success: true, data: { cancelled: true } });
+    }
+    
+    res.json({ success: true, data: { path: selectedPath, cancelled: false } });
+  } catch (error) {
+    // Si el usuario cancela, puede haber un error
+    if (error instanceof Error && error.message.includes('cancelled')) {
+      return res.json({ success: true, data: { cancelled: true } });
+    }
+    
     res.status(500).json({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error' 
