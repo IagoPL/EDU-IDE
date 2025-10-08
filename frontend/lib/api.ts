@@ -461,6 +461,85 @@ class ApiClient {
       body: JSON.stringify({ name, email }),
     });
   }
+
+  // Debug API
+  async startDebug(file: string, args: string[] = []): Promise<ApiResponse<any>> {
+    return this.request('/api/debug/start', {
+      method: 'POST',
+      body: JSON.stringify({ file, args }),
+    });
+  }
+
+  async stopDebug(sessionId: string): Promise<ApiResponse<void>> {
+    return this.request('/api/debug/stop', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
+    });
+  }
+
+  async setBreakpoint(sessionId: string, file: string, line: number, condition?: string): Promise<ApiResponse<any>> {
+    return this.request('/api/debug/breakpoint/set', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, file, line, condition }),
+    });
+  }
+
+  async removeBreakpoint(sessionId: string, breakpointId: string): Promise<ApiResponse<void>> {
+    return this.request('/api/debug/breakpoint/remove', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, breakpointId }),
+    });
+  }
+
+  async toggleBreakpoint(sessionId: string, breakpointId: string): Promise<ApiResponse<void>> {
+    return this.request('/api/debug/breakpoint/toggle', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, breakpointId }),
+    });
+  }
+
+  async debugContinue(sessionId: string): Promise<ApiResponse<void>> {
+    return this.request('/api/debug/continue', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
+    });
+  }
+
+  async debugPause(sessionId: string): Promise<ApiResponse<void>> {
+    return this.request('/api/debug/pause', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
+    });
+  }
+
+  async debugStepOver(sessionId: string): Promise<ApiResponse<void>> {
+    return this.request('/api/debug/step/over', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
+    });
+  }
+
+  async debugStepInto(sessionId: string): Promise<ApiResponse<void>> {
+    return this.request('/api/debug/step/into', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
+    });
+  }
+
+  async debugStepOut(sessionId: string): Promise<ApiResponse<void>> {
+    return this.request('/api/debug/step/out', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
+    });
+  }
+
+  async getDebugSession(): Promise<ApiResponse<any>> {
+    return this.request('/api/debug/session/current');
+  }
+
+  async getDebugSessions(): Promise<ApiResponse<any[]>> {
+    return this.request('/api/debug/sessions');
+  }
 }
 
 export const api = new ApiClient();
