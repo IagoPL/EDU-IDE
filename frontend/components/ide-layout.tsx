@@ -160,7 +160,7 @@ export function IDELayout() {
           {/* Right Panel */}
           {rightPanelOpen && (
             <div className="w-80 flex-shrink-0 border-l border-border">
-              <RightPanel onFileSelect={handleFileOpen} />
+              <RightPanel onFileSelect={handleFileOpen} activeFile={activeFile} />
             </div>
           )}
         </div>

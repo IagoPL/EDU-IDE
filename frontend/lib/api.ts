@@ -589,6 +589,35 @@ class ApiClient {
   async searchDocumentation(tags: string[]): Promise<ApiResponse<{ resources: any[] }>> {
     return this.request(`/api/documentation/search?tags=${tags.join(',')}`);
   }
+
+  // Snippets API
+  async getSnippetsByLanguage(language: string): Promise<ApiResponse<{ snippets: any[] }>> {
+    return this.request(`/api/snippets/language/${language}`);
+  }
+
+  async getSnippetsByCategory(category: string): Promise<ApiResponse<{ snippets: any[] }>> {
+    return this.request(`/api/snippets/category/${category}`);
+  }
+
+  async getSnippetsByLevel(level: 'beginner' | 'intermediate' | 'advanced'): Promise<ApiResponse<{ snippets: any[] }>> {
+    return this.request(`/api/snippets/level/${level}`);
+  }
+
+  async searchSnippets(query: string): Promise<ApiResponse<{ snippets: any[] }>> {
+    return this.request(`/api/snippets/search?q=${encodeURIComponent(query)}`);
+  }
+
+  async getSnippetCategories(): Promise<ApiResponse<{ categories: any[] }>> {
+    return this.request('/api/snippets/categories');
+  }
+
+  async getRecommendedSnippets(file: string): Promise<ApiResponse<{ snippets: any[] }>> {
+    return this.request(`/api/snippets/recommend?file=${encodeURIComponent(file)}`);
+  }
+
+  async getSnippetById(id: string): Promise<ApiResponse<{ snippet: any }>> {
+    return this.request(`/api/snippets/${id}`);
+  }
 }
 
 export const api = new ApiClient();
